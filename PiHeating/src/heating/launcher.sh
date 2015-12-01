@@ -4,5 +4,5 @@
 
 cd /
 cd home/pi/heating
-sudo python maxmainkiosk.py
+sudo python main.py
 cd /
