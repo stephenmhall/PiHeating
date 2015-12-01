@@ -5,7 +5,7 @@ from os import curdir, sep, system, execl
 from sys import platform as _platform, executable, argv
 from database import DbUtils
 DB=DbUtils()
-from heating.webui import CreateUIPage
+from webui import CreateUIPage
 from graphing import MakeGraph
 CUI = CreateUIPage()
 GRAPH = MakeGraph()
