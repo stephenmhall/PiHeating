@@ -1,6 +1,5 @@
 import time
-import urllib2
-import json
+
 from database import DbUtils
 DB = DbUtils()
 
@@ -77,19 +76,7 @@ class CreateUIPage():
         except:
             dutyCycle = 0
         return int(dutyCycle)
-    
-    def getCurrentOutsidetemp(self):
-        try:
-            f = urllib2.urlopen('http://api.wunderground.com/api/0401dc3c2aa3313a/conditions/q/57.155689,-2.295520.json')
-            json_string = f.read()
-            parsed_json = json.loads(json_string)
-            #location = parsed_json['location']['city']
-            temp_c = parsed_json['current_observation']['temp_c']
-            #print "Current temperature is: %s" % ( temp_c)
-            f.close()
-            return temp_c
-        except:
-            print "no temp"
+
 
     def createRooms(self):
         logTime = time.time()

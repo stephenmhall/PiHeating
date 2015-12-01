@@ -22,6 +22,8 @@ import datetime
 import time
 import requests
 import threading
+import urllib2
+import json
 
 from SocketServer import ThreadingMixIn
 from BaseHTTPServer import HTTPServer
@@ -57,6 +59,8 @@ class MainWindow():
 
         self.startKioskServer()
         self.doLoop()
+        self.outsideTempCheck = 0
+        self.outsideTemp = self.getCurrentOutsidetemp()
         
     def onBoilerSwitch(self):
         try:
@@ -267,6 +271,19 @@ class MainWindow():
                 print keys, valves[keys]
         validData = False
         
+    def getCurrentOutsidetemp(self):
+        try:
+            f = urllib2.urlopen('http://api.wunderground.com/api/0401dc3c2aa3313a/conditions/q/57.155689,-2.295520.json')
+            json_string = f.read()
+            parsed_json = json.loads(json_string)
+            #location = parsed_json['location']['city']
+            temp_c = parsed_json['current_observation']['temp_c']
+            #print "Current temperature is: %s" % ( temp_c)
+            f.close()
+            return temp_c
+        except:
+            print "no temp"
+        
     def switchHeat(self):
         logTime = time.time()
         Vera_Variables = DB.getVariables()
@@ -275,10 +292,15 @@ class MainWindow():
         Vera_Device = Vera_Variables[4]
         
         roomTemps = CUI.createRooms()
-        outsideTemp = CUI.getCurrentOutsidetemp()
+        
+        if self.outsideTempCheck == 3:
+            self.outsideTemp = self.getCurrentOutsidetemp()
+            self.outsideTempCheck = 0
+        else:
+            self.outsideTempCheck += 1
         
         for i in range (len(roomTemps)):
-            roomTemps[i] = roomTemps[i] + (str(outsideTemp),)
+            roomTemps[i] = roomTemps[i] + (str(self.outsideTemp),)
 
         # Calculate if heat is required
         valveList = []
