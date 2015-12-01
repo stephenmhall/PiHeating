@@ -28,9 +28,9 @@ import json
 from SocketServer import ThreadingMixIn
 from BaseHTTPServer import HTTPServer
 
-from heating.requesthandler import MyRequestHandler
+from requesthandler import MyRequestHandler
 from database import DbUtils
-from heating.webui import CreateUIPage
+from webui import CreateUIPage
 CUI = CreateUIPage()
 DB = DbUtils()
 
