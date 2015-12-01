@@ -44,7 +44,7 @@ validData = False
 veraControl = "{}/data_request?id=lu_action&output_format=xml&DeviceNum={}&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue={}"
 boilerOn = 0
 weekDays = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
-
+outsideTempCheck = 0
 
 
 class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
@@ -58,9 +58,9 @@ class MainWindow():
             DB.initialiseDB()
 
         self.startKioskServer()
-        self.doLoop()
-        self.outsideTempCheck = 0
         self.outsideTemp = self.getCurrentOutsidetemp()
+        self.doLoop()
+        
         
     def onBoilerSwitch(self):
         try:
@@ -285,6 +285,7 @@ class MainWindow():
             print "no temp"
         
     def switchHeat(self):
+        global outsideTempCheck
         logTime = time.time()
         Vera_Variables = DB.getVariables()
         boilerEnabled = int(Vera_Variables[5])
@@ -293,11 +294,11 @@ class MainWindow():
         
         roomTemps = CUI.createRooms()
         
-        if self.outsideTempCheck == 3:
+        if outsideTempCheck == 3:
             self.outsideTemp = self.getCurrentOutsidetemp()
-            self.outsideTempCheck = 0
+            outsideTempCheck = 0
         else:
-            self.outsideTempCheck += 1
+            outsideTempCheck += 1
         
         for i in range (len(roomTemps)):
             roomTemps[i] = roomTemps[i] + (str(self.outsideTemp),)
