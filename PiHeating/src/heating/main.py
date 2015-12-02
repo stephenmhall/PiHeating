@@ -274,13 +274,14 @@ class MainWindow():
     def getCurrentOutsidetemp(self):
         try:
             # using openweathermap api
-            f = urllib2.urlopen('http://api.openweathermap.org/data/2.5/weather?id=6640068&units=metric&APPID=713951e4ce665b2d2d5d1b7a10b88f63')
+            f = urllib2.urlopen('http://api.openweathermap.org/data/2.5/weather?id=6640068&APPID=713951e4ce665b2d2d5d1b7a10b88f63')
             json_string = f.read()
             parsed_json = json.loads(json_string)
             #location = parsed_json['location']['city']
-            temp_c = parsed_json['main']['temp']
-            #print temp_c
+            temp_c = parsed_json['main']['temp'] # kelvin -273.15
+            temp_c = int(temp_c) - 273.15
             f.close()
+            print temp_c
             return temp_c
         except:
             print "no temp"
