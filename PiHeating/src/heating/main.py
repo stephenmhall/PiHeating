@@ -12,7 +12,7 @@ test change
 
 from __future__ import division
 
-__updated__ = "2015-12-01"
+__updated__ = "2015-12-02"
 
 
 import socket   #for sockets
@@ -273,12 +273,13 @@ class MainWindow():
         
     def getCurrentOutsidetemp(self):
         try:
-            f = urllib2.urlopen('http://api.wunderground.com/api/0401dc3c2aa3313a/conditions/q/57.155689,-2.295520.json')
+            # using openweathermap api
+            f = urllib2.urlopen('http://api.openweathermap.org/data/2.5/weather?id=6640068&units=metric&APPID=713951e4ce665b2d2d5d1b7a10b88f63')
             json_string = f.read()
             parsed_json = json.loads(json_string)
             #location = parsed_json['location']['city']
-            temp_c = parsed_json['current_observation']['temp_c']
-            #print "Current temperature is: %s" % ( temp_c)
+            temp_c = parsed_json['main']['temp']
+            #print temp_c
             f.close()
             return temp_c
         except:
@@ -294,7 +295,7 @@ class MainWindow():
         
         roomTemps = CUI.createRooms()
         
-        if outsideTempCheck == 3:
+        if outsideTempCheck == 2:
             self.outsideTemp = self.getCurrentOutsidetemp()
             outsideTempCheck = 0
         else:
