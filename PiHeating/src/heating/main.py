@@ -281,7 +281,7 @@ class MainWindow():
             temp_c = parsed_json['main']['temp'] # kelvin -273.15
             temp_c = int(temp_c) - 273.15
             f.close()
-            print temp_c
+            #print temp_c
             return temp_c
         except:
             print "no temp"
