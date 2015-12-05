@@ -12,7 +12,7 @@ test change
 
 from __future__ import division
 
-__updated__ = "2015-12-02"
+__updated__ = "2015-12-05"
 
 
 import socket   #for sockets
@@ -31,6 +31,8 @@ from BaseHTTPServer import HTTPServer
 from requesthandler import MyRequestHandler
 from database import DbUtils
 from webui import CreateUIPage
+from variables import Variables
+VAR = Variables()
 CUI = CreateUIPage()
 DB = DbUtils()
 
@@ -49,22 +51,28 @@ outsideTempCheck = 0
 
 class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
     """Handle requests is separate thread"""
+    
+    
 
 class MainWindow():
     def __init__(self):
         try:
-            DB.getVariables()
+            DB.getCubes()
         except:
             DB.initialiseDB()
 
         self.startKioskServer()
         self.outsideTemp = self.getCurrentOutsidetemp()
         self.doLoop()
+        #web_IP = VAR.readVariables('WebIP')
+        #print 'variables read ', web_IP
+        #VAR.writeVariable('Interval', 135)
+        
         
         
     def onBoilerSwitch(self):
         try:
-            isBoilerON = int(DB.getVariables()[5])
+            isBoilerON = int(VAR.readVariables(''))
         except:
             isBoilerON = 0
         if isBoilerON:
