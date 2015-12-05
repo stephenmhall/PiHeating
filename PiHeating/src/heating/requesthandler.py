@@ -3,10 +3,12 @@ from BaseHTTPServer import BaseHTTPRequestHandler
 import cgi
 from os import curdir, sep, system, execl
 from sys import platform as _platform, executable, argv
-from database import DbUtils
-DB=DbUtils()
+#from database import DbUtils
+#DB=DbUtils()
 from webui import CreateUIPage
 from graphing import MakeGraph
+from variables import Variables
+VAR = Variables()
 CUI = CreateUIPage()
 GRAPH = MakeGraph()
 
@@ -28,12 +30,14 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             self.path="/graph.html"
             
         elif self.path =="/?confirm=1&boilerswitch=Boiler+Enabled":
-            DB.updateBoilerState(0)
+            #DB.updateBoilerState(0)
+            VAR.writeVariable([['BoilerEnabled', 0]])
             #self.path = "/index.html"
             self.updateUIPages(roomTemps)
             
         elif self.path == '/?confirm=1&boilerswitch=Boiler+Disabled':
-            DB.updateBoilerState(1)
+            #DB.updateBoilerState(1)
+            VAR.writeVariable([['BoilerEnabled', 1]])
             #self.path = "/index.html"
             self.updateUIPages(roomTemps)
             
@@ -126,36 +130,14 @@ class MyRequestHandler(BaseHTTPRequestHandler):
                          'CONTENT_TYPE':self.headers['Content-Type'],
             })
             #print form.keys()
-            boiler_enabled = DB.getVariables()[5]
-            #print 'variables update boiler ', boiler_enabled
-            print_enable = 0
-            max_ip          = form['maxip'].value
-            max_port        = form['maxport'].value
-            vera_address    = form['veraaddress'].value
-            vera_device     = form['veradevice'].value
-            valve_interval  = form['interval'].value
-            web_ip          = form['webip'].value
-            web_port        = form['webport'].value
-            page_refresh    = form['pagerefresh'].value
-            graph_period    = form['graphperiod'].value
-                
-            variableList = DB.getVariables()[1:]
-            cube_ok = variableList[9]
-            vera_ok = variableList[10]
-            
-            graphPeriod = graph_period
-            print 'saving graphPeriod as : ', graphPeriod
-            
-            msg = max_ip,max_port,vera_address,vera_device,boiler_enabled,valve_interval,print_enable,web_ip,web_port,cube_ok,vera_ok,page_refresh
-            #print msg
-        
-            for i in range(0, len(msg)):
-                if str(msg[i]) != str(variableList[i]):
-                    print msg[i], variableList[i]
-                    print 'not equal saving DB'
-                    DB.updateVariables(msg)
-                    break
-    
+            output = []
+            for key in form.keys():
+                varList=[]
+                varList.append(key)
+                varList.append(form[key].value)
+                output.append(varList)
+            print output
+            VAR.writeVariable( output )
             self.updateUIPages(roomTemps)    
         
         try:

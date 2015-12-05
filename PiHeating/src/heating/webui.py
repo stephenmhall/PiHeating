@@ -1,7 +1,9 @@
 import time
 
 from database import DbUtils
+from variables import Variables
 DB = DbUtils()
+VAR = Variables()
 
 class CreateUIPage():
     def __init__(self):
@@ -119,7 +121,8 @@ class CreateUIPage():
         return roomTemps
         
     def pageTop(self):
-        webRefresh = DB.getVariables()[12]
+        #webRefresh = DB.getVariables()[12]
+        webRefresh = VAR.readVariables(['PageRefresh'])
         pageText = []
         pageText.append("""
         <!DOCTYPE html>
@@ -257,10 +260,13 @@ class CreateUIPage():
     
     
     def pageHeader(self):
-        variables = DB.getVariables()
+        #variables = DB.getVariables()
         
-        page_refresh = variables[6]
-        boiler_enabled = variables[5]
+        #page_refresh = variables[6]
+        #boiler_enabled = variables[5]
+        
+        page_refresh, boiler_enabled = VAR.readVariables(['PageRefresh', 'BoilerEnabled'])
+        
         theTime = self.OnUpdateTime()
         if boiler_enabled != 1:
             page_refresh = page_refresh * 2
@@ -324,10 +330,12 @@ class CreateUIPage():
         except:
             heating_state = 0
         duty_cycle = DB.getCubes()[3]
-        heating_variables = DB.getVariables()
-        boiler_state = heating_variables[5]
-        cube_state = heating_variables[10]
-        vera_state = heating_variables[11]
+#         heating_variables = DB.getVariables()
+#         boiler_state = heating_variables[5]
+#         cube_state = heating_variables[10]
+#         vera_state = heating_variables[11]
+
+        boiler_state, cube_state, vera_state = VAR.readVariables(['BoilerEnabled', 'CubeOK', 'VeraOK'])
         heating_cycle = self.dutyCycle()
 
         
@@ -369,7 +377,8 @@ class CreateUIPage():
         return html_text
     
     def adminButton(self):
-        webRefresh = DB.getVariables()[12]
+        #webRefresh = DB.getVariables()[12]
+        webRefresh = VAR.readVariables(['PageRefresh'])
         html_text = """
         <div class="container-fluid bg-3 text-center">
             <div class="btn-group btn-group-lg">
@@ -380,7 +389,8 @@ class CreateUIPage():
         return html_text
     
     def homeButton(self):
-        webRefresh = DB.getVariables()[12]
+        #webRefresh = DB.getVariables()[12]
+        webRefresh = VAR.readVariables(['PageRefresh'])
         html_text = """
         <div class="container-fluid bg-3 text-center">
             <div class="btn-group btn-group-lg">
@@ -391,81 +401,32 @@ class CreateUIPage():
         return html_text
     
     def variablesPage(self):
-        self.variableList = DB.getVariables()
-        MaxIP           = self.variableList[1]
-        MaxPort         = self.variableList[2]
-        VeraAddress     = self.variableList[3]
-        VeraDevice      = self.variableList[4]
-        intervalTime    = self.variableList[6]
-        webip           = self.variableList[8]
-        webport         = int(self.variableList[9])
-        pagerefresh     = int(self.variableList[12])
+        pageText = []
+        pageText.append("""<div class="container-fluid bg-2">
+            <form class="form-horizontal" role="form" action="/admin" method="POST">""")
+        variables = VAR.variableData()
+        for item in variables:
+            if len(item) > 3:
+                _text = item.split('=')
+                pageText.append("""
+                <div class="form-group">
+                    <label class="control-label col-xs-3" for="{0}">{0}:</label>
+                        <div class="col-xs-5">
+                            <input type="text" class="form-control" id="{0}" name="{0}" value="{1}">
+                        </div>
+                        <div class="col-xs-4"></div>
+                    </div>
+                """.format(_text[0],_text[1]))
+                
+        pageText.append("""
+        <div class="container-fluid text-center">
+            <input type="submit" class="btn btn-default btn-lg onClick="refreshPage();" id="submit" value="Submit Changes" />
+                </div>
+            </form>
+        </div>""")
             
-        variable_Text = """
-        <div class="container-fluid bg-2">
-            <form class="form-horizontal" role="form" action="/admin" method="POST">
-                <div class="form-group">
-                    <label class="control-label col-xs-3" for="maxIP">Max! IP:</label>
-                    <div class="col-xs-5">
-                        <input type="text" class="form-control" id="maxIP" name="maxip" value="{}">
-                    </div>
-                    <div class="col-xs-4"></div>
-                </div>
-                <div class="form-group">
-                    <label class="control-label col-xs-3" for="maxIP">Max! Port:</label>
-                    <div class="col-xs-5">
-                        <input type="text" class="form-control" id="maxPort" name="maxport" value="{}">
-                    </div>
-                    <div class="col-xs-4"></div>
-                </div>
-                <div class="form-group">
-                    <label class="control-label col-xs-3" for="veraAddress">Vera Address:</label>
-                    <div class="col-xs-5">
-                        <input type="text" class="form-control" id="veraAddress" name="veraaddress" value="{}">
-                    </div>
-                    <div class="col-xs-4"></div>
-                </div>
-                <div class="form-group">
-                    <label class="control-label col-xs-3" for="veraDevice">Vera Device (94):</label>
-                    <div class="col-xs-5">
-                        <input type="text" class="form-control" id="veraDevice" name="veradevice" value="{}">
-                    </div>
-                    <div class="col-xs-4"></div>
-                </div>
-                <div class="form-group">
-                    <label class="control-label col-xs-3" for="webIP">WebUI IP:</label>
-                    <div class="col-xs-5">
-                        <input type="text" class="form-control" id="webIP" name="webip" value="{}">
-                    </div>
-                    <div class="col-xs-4"></div>
-                </div>
-                <div class="form-group">
-                    <label class="control-label col-xs-3" for="webPort">WebUI Port:</label>
-                    <div class="col-xs-5">
-                        <input type="text" class="form-control" id="webPort" name="webport" value="{}">
-                    </div>
-                    <div class="col-xs-4"></div>
-                </div>
-                <div class="form-group">
-                    <label class="control-label col-xs-3" for="interval">Max! Check Interval:</label>
-                    <div class="col-xs-5">
-                        <input type="text" class="form-control" id="interval" name="interval" value="{}">
-                    </div>
-                    <div class="col-xs-4"></div>
-                </div>
-                <div class="form-group">
-                    <label class="control-label col-xs-3" for="pagerefresh">Page Refresh:</label>
-                    <div class="col-xs-5">
-                        <input type="text" class="form-control" id="pagerefresh" name="pagerefresh" value="{}">
-                    </div>
-                    <div class="col-xs-4"></div>
-                </div>
-                <div class="container-fluid text-center">
-                    <input type="submit" class="btn btn-default btn-lg onClick="refreshPage();" id="submit" value="Submit Changes" />
-                </div>
-                </form>
-            </div>""".format(MaxIP,MaxPort,VeraAddress,VeraDevice,webip,webport,intervalTime,pagerefresh)
-        return variable_Text
+        html_text = ''.join(pageText)
+        return html_text
     
     def shutdownButton(self):
         html_text = """

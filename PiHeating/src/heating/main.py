@@ -43,7 +43,7 @@ valves = {}
 valveList = []
 message = ""
 validData = False
-veraControl = "{}/data_request?id=lu_action&output_format=xml&DeviceNum={}&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue={}"
+veraControl = "http://{}:{}/data_request?id=lu_action&output_format=xml&DeviceNum={}&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue={}"
 boilerOn = 0
 weekDays = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
 outsideTempCheck = 0
@@ -64,22 +64,23 @@ class MainWindow():
         self.startKioskServer()
         self.outsideTemp = self.getCurrentOutsidetemp()
         self.doLoop()
-        #web_IP = VAR.readVariables('WebIP')
-        #print 'variables read ', web_IP
-        #VAR.writeVariable('Interval', 135)
+        #web_IP, web_Port = VAR.readVariables(('WebIP','WebPort'))
+        #print 'variables read ', web_IP, ' : ', web_Port
+        #VAR.writeVariable( [['Interval', 125],['PageRefresh', 55],['CubeOk', 1]] )
         
         
         
     def onBoilerSwitch(self):
         try:
-            isBoilerON = int(VAR.readVariables(''))
+            isBoilerON = int(VAR.readVariables(['BoilerEnabled']))
         except:
             isBoilerON = 0
         if isBoilerON:
             isBoilerON = 0
         else:
             isBoilerON = 1
-        DB.updateBoilerState(isBoilerON)
+        VAR.writeVariable([['BoilerEnabled', isBoilerON]])
+        #DB.updateBoilerState(isBoilerON)
         self.switchHeat()
     
     def OnUpdateTime(self):
@@ -201,10 +202,8 @@ class MainWindow():
             
     def getData(self):
         global validData
-        Max_Variables = DB.getVariables()
-        Max_IP = Max_Variables[1]
-        Max_Port = Max_Variables[2]
-        print Max_IP, Max_Port
+        Max_IP, Max_Port = VAR.readVariables(['MaxIP', 'MaxPort'])
+        print 'Max Connection Starting on : ',Max_IP, Max_Port
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.settimeout(1)
@@ -216,13 +215,12 @@ class MainWindow():
              
         #Connect to remote server
         try:
-            s.connect((Max_IP , Max_Port))
+            s.connect((Max_IP, int(Max_Port)))
             print 'Socket Connected to Max on ip ' + Max_IP
         except:
             s.close()
-            DB.updateCubeState(0)
-            #CUI.saveUI()
-            #CUI.saveAdminUI()
+            #DB.updateCubeState(0)
+            VAR.writeVariable([['CubeOK', 0]])
             print "Unable to make connection Trying later"
             return
          
@@ -237,15 +235,15 @@ class MainWindow():
             print "Message ended"
             
         if message != "":
-            DB.updateCubeState(1)
+            #DB.updateCubeState(1)
+            VAR.writeVariable([['CubeOK', 1]])
             validData = True
             
         s.close()
         return message        
     
     def parseData(self, message):
-        Vera_Variables = DB.getVariables()
-        print_on = int(Vera_Variables[7])
+        print_on = int(VAR.readVariables(['PrintData']))
         message = message.split('\r\n')
         global validData
     
@@ -280,16 +278,17 @@ class MainWindow():
         validData = False
         
     def getCurrentOutsidetemp(self):
+        """
+        Get Current outside temperature from OpenWeatherMap using the API
+        """
         try:
-            # using openweathermap api
-            f = urllib2.urlopen('http://api.openweathermap.org/data/2.5/weather?id=6640068&APPID=713951e4ce665b2d2d5d1b7a10b88f63')
+            userKey = VAR.readVariables(['WeatherKey'])
+            f = urllib2.urlopen('http://api.openweathermap.org/data/2.5/weather?id=6640068&APPID={}'.format(userKey))
             json_string = f.read()
             parsed_json = json.loads(json_string)
-            #location = parsed_json['location']['city']
             temp_c = parsed_json['main']['temp'] # kelvin -273.15
             temp_c = int(temp_c) - 273.15
             f.close()
-            #print temp_c
             return temp_c
         except:
             print "no temp"
@@ -297,10 +296,8 @@ class MainWindow():
     def switchHeat(self):
         global outsideTempCheck
         logTime = time.time()
-        Vera_Variables = DB.getVariables()
-        boilerEnabled = int(Vera_Variables[5])
-        Vera_Address = Vera_Variables[3]
-        Vera_Device = Vera_Variables[4]
+        
+        boilerEnabled, Vera_Address, Vera_Port, Vera_Device = VAR.readVariables(['BoilerEnabled', 'VeraIP', 'VeraPort', 'VeraDevice'])
         
         roomTemps = CUI.createRooms()
         
@@ -333,7 +330,7 @@ class MainWindow():
 
         if boilerEnabled:
             try:
-                _ = requests.get(veraControl.format(Vera_Address, Vera_Device, str(boilerState)), timeout=5)
+                _ = requests.get(veraControl.format(Vera_Address, Vera_Port, Vera_Device, str(boilerState)), timeout=5)
                 DB.updateVeraState(1)
                 print 'message sent to Vera'
             except:
@@ -342,7 +339,7 @@ class MainWindow():
         else:
             boilerState = 0
             try:
-                _ = requests.get(veraControl.format(Vera_Address, Vera_Device, boilerState), timeout=5)
+                _ = requests.get(veraControl.format(Vera_Address, Vera_Port, Vera_Device, boilerState), timeout=5)
                 DB.updateVeraState(1)
                 print "Boiler is Disabled"
             except:
@@ -365,8 +362,7 @@ class MainWindow():
             
         
     def doLoop(self):
-        checkInterval = DB.getVariables()[6]
-        boiler_enabled = DB.getVariables()[5]
+        checkInterval, boiler_enabled = VAR.readVariables(['Interval', 'BoilerEnabled'])
         MAXData = self.getData()
         if validData:
             self.parseData(MAXData)
@@ -377,11 +373,9 @@ class MainWindow():
     
     
         
-    def startKioskServer(self):
-        variables = DB.getVariables()
-        webIP = variables[8]
-        webPort = variables[9]
-        
+    def startKioskServer(self):        
+        webIP, webPort = VAR.readVariables(['WebIP', 'WebPort'])
+        print 'Web UI Starting on : ', webIP, webPort
         s_server = ThreadingHTTPServer((webIP, webPort), MyRequestHandler)
         uithread = threading.Thread(target=s_server.serve_forever)
         uithread.setDaemon(True)
