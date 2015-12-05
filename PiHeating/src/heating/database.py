@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sqlite3
 #variableList = (1,'192.168.0.36',62910,'http://192.168.0.13:3480',"92",1,120,0,'192.168.0.22',4102,1,1,65)
-variableList = (1,'192.168.0.36',62910,'http://192.168.0.13:3480',"94",1,120,0,'192.168.0.41',4102,1,1,65)
+#variableList = (1,'192.168.0.36',62910,'http://192.168.0.13:3480',"94",1,120,0,'192.168.0.41',4102,1,1,65)
 dataBase =  'heating.db'
 
 class DbUtils():
@@ -50,21 +50,21 @@ class DbUtils():
                          State INTEGER)
                         """)
         
-        cursor.execute("""CREATE TABLE IF NOT EXISTS variables
-                        (ID INTEGER PRIMARY KEY ASC,
-                         MaxIP TEXT,
-                         MaxPort INTEGER,
-                         VeraIP TEXT,
-                         VeraDevice TEXT,
-                         BoilerEnabled INTEGER,
-                         Interval INTEGER,
-                         PrintOutput INTEGER,
-                         WebIP TEXT,
-                         WebPort INTEGER,
-                         CubeOK INTEGER,
-                         VeraOK INTEGER,
-                         PageRefresh INTEGER)
-                        """)
+#         cursor.execute("""CREATE TABLE IF NOT EXISTS variables
+#                         (ID INTEGER PRIMARY KEY ASC,
+#                          MaxIP TEXT,
+#                          MaxPort INTEGER,
+#                          VeraIP TEXT,
+#                          VeraDevice TEXT,
+#                          BoilerEnabled INTEGER,
+#                          Interval INTEGER,
+#                          PrintOutput INTEGER,
+#                          WebIP TEXT,
+#                          WebPort INTEGER,
+#                          CubeOK INTEGER,
+#                          VeraOK INTEGER,
+#                          PageRefresh INTEGER)
+#                         """)
         
         cursor.execute("""CREATE TABLE IF NOT EXISTS temps
                         (ID INTEGER PRIMARY KEY ASC,
@@ -76,9 +76,9 @@ class DbUtils():
                          OutsideTemp TEXT)
                         """)
         
-        with conn:
-            cursor.execute("""INSERT OR IGNORE into variables(ID,MaxIP,MaxPort,VeraIP,VeraDevice,BoilerEnabled,Interval,PrintOutput,WebIP,WebPort,CubeOK,VeraOK,PageRefresh)\
-            VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)""", variableList)
+#         with conn:
+#             cursor.execute("""INSERT OR IGNORE into variables(ID,MaxIP,MaxPort,VeraIP,VeraDevice,BoilerEnabled,Interval,PrintOutput,WebIP,WebPort,CubeOK,VeraOK,PageRefresh)\
+#             VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)""", variableList)
         
             
     def insertTemps(self, msg):
@@ -179,59 +179,59 @@ class DbUtils():
             #print "Closing Database"
             conn.close()
 
-    def updateVariables(self, msg):
-        try:
-            conn = sqlite3.connect(dataBase)
-            cursor = conn.cursor()
-            cursor.execute("""INSERT OR IGNORE into variables(ID,MaxIP,MaxPort,VeraIP,VeraDevice,BoilerEnabled,Interval,PrintOutput,WebIP,WebPort,CubeOK,VeraOK,PageRefresh)\
-                VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?)""", msg)
-            conn.commit()
+#     def updateVariables(self, msg):
+#         try:
+#             conn = sqlite3.connect(dataBase)
+#             cursor = conn.cursor()
+#             cursor.execute("""INSERT OR IGNORE into variables(ID,MaxIP,MaxPort,VeraIP,VeraDevice,BoilerEnabled,Interval,PrintOutput,WebIP,WebPort,CubeOK,VeraOK,PageRefresh)\
+#                 VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?)""", msg)
+#             conn.commit()
+#             
+#         except Exception as e:
+#             conn.rollback()
+#             raise e
+#         finally:
+#             conn.close()
             
-        except Exception as e:
-            conn.rollback()
-            raise e
-        finally:
-            conn.close()
+#     def updateBoilerState(self, msg):
+#         try:
+#             conn = sqlite3.connect(dataBase)
+#             cursor = conn.cursor()
+#             cursor.execute("""UPDATE variables SET BoilerEnabled={}""".format(msg))
+#             conn.commit()
+#             
+#         except Exception as e:
+#             conn.rollback()
+#             raise e
+#         finally:
+#             conn.close()
             
-    def updateBoilerState(self, msg):
-        try:
-            conn = sqlite3.connect(dataBase)
-            cursor = conn.cursor()
-            cursor.execute("""UPDATE variables SET BoilerEnabled={}""".format(msg))
-            conn.commit()
+#     def updateCubeState(self, msg):
+#         print 'changing cube state to ', msg
+#         try:
+#             conn = sqlite3.connect(dataBase)
+#             cursor = conn.cursor()
+#             cursor.execute("""UPDATE variables SET CubeOK={}""".format(msg))
+#             conn.commit()
+#             
+#         except Exception as e:
+#             conn.rollback()
+#             raise e
+#         finally:
+#             conn.close()
             
-        except Exception as e:
-            conn.rollback()
-            raise e
-        finally:
-            conn.close()
-            
-    def updateCubeState(self, msg):
-        print 'changing cube state to ', msg
-        try:
-            conn = sqlite3.connect(dataBase)
-            cursor = conn.cursor()
-            cursor.execute("""UPDATE variables SET CubeOK={}""".format(msg))
-            conn.commit()
-            
-        except Exception as e:
-            conn.rollback()
-            raise e
-        finally:
-            conn.close()
-            
-    def updateVeraState(self, msg):
-        try:
-            conn = sqlite3.connect(dataBase)
-            cursor = conn.cursor()
-            cursor.execute("""UPDATE variables SET VeraOK={}""".format(msg))
-            conn.commit()
-            
-        except Exception as e:
-            conn.rollback()
-            raise e
-        finally:
-            conn.close()
+#     def updateVeraState(self, msg):
+#         try:
+#             conn = sqlite3.connect(dataBase)
+#             cursor = conn.cursor()
+#             cursor.execute("""UPDATE variables SET VeraOK={}""".format(msg))
+#             conn.commit()
+#             
+#         except Exception as e:
+#             conn.rollback()
+#             raise e
+#         finally:
+#             conn.close()
             
     def getTemps(self, roomName, currentTime):
         conn = sqlite3.connect(dataBase)
@@ -241,13 +241,13 @@ class DbUtils():
             variables = cursor.fetchall()
             return variables
             
-    def getVariables(self):
-        conn = sqlite3.connect(dataBase)
-        cursor = conn.cursor()
-        with conn:
-            cursor.execute("SELECT * FROM variables WHERE ID = (SELECT MAX(ID) FROM variables)")
-            variables = cursor.fetchall()
-            return variables[0]
+#     def getVariables(self):
+#         conn = sqlite3.connect(dataBase)
+#         cursor = conn.cursor()
+#         with conn:
+#             cursor.execute("SELECT * FROM variables WHERE ID = (SELECT MAX(ID) FROM variables)")
+#             variables = cursor.fetchall()
+#             return variables[0]
         
     def getCubes(self):
         conn = sqlite3.connect(dataBase)

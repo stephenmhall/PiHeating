@@ -136,7 +136,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
                 varList.append(key)
                 varList.append(form[key].value)
                 output.append(varList)
-            print output
+            #print output
             VAR.writeVariable( output )
             self.updateUIPages(roomTemps)    
         

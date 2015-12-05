@@ -331,19 +331,23 @@ class MainWindow():
         if boilerEnabled:
             try:
                 _ = requests.get(veraControl.format(Vera_Address, Vera_Port, Vera_Device, str(boilerState)), timeout=5)
-                DB.updateVeraState(1)
+                #DB.updateVeraState(1)
+                VAR.writeVariable([['VeraOK', 1]])
                 print 'message sent to Vera'
             except:
-                DB.updateVeraState(0)
+                #DB.updateVeraState(0)
+                VAR.writeVariable([['VeraOK', 0]])
                 print "vera is unreachable"
         else:
             boilerState = 0
             try:
                 _ = requests.get(veraControl.format(Vera_Address, Vera_Port, Vera_Device, boilerState), timeout=5)
-                DB.updateVeraState(1)
+                #DB.updateVeraState(1)
+                VAR.writeVariable([['VeraOK', 1]])
                 print "Boiler is Disabled"
             except:
-                DB.updateVeraState(0)
+                #DB.updateVeraState(0)
+                VAR.writeVariable([['VeraOK', 0]])
                 print "vera is unreachable"
         try:
             boilerOn = DB.getBoiler()[2]

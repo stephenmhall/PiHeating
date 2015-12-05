@@ -39,8 +39,10 @@ class Variables(object):
                 if data[i].split('=')[0] == change[0]:
                     data[i] = "{}={}".format(change[0],change[1])
                     
+        #print data
         with open('variables.txt', 'w') as f:
             for items in data:
+                #print items
                 print>>f, items
                 
     def variableData(self):
