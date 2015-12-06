@@ -80,7 +80,7 @@ class MakeGraph():
                     break
                 
             timeString = (datetime.datetime.fromtimestamp(float(tempTime)).strftime('%d %H:%M'))
-            pageText.append("""['{}', {}, {}, {}, {}, {}],
+            pageText.append("""['{0}', {1}, {2}, {3:.1f}, {4}, {5}],
             """.format(timeString,setPoint,realTemp,outsideTemp,boilerOn,valvePos))
         pageText.append("""]);
         """)
@@ -94,6 +94,7 @@ class MakeGraph():
             seriesType: 'line',
             interpolateNulls: true,
             series: {{
+                2: {{curveType: 'function'}},
                 3: {{type: 'area'}},
                 4: {{type: 'area'}}
             }}

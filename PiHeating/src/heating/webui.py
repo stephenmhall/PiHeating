@@ -265,16 +265,16 @@ class CreateUIPage():
         #page_refresh = variables[6]
         #boiler_enabled = variables[5]
         
-        page_refresh, boiler_enabled = VAR.readVariables(['PageRefresh', 'BoilerEnabled'])
+        heat_Interval, boiler_enabled = VAR.readVariables(['Interval', 'BoilerEnabled'])
         
         theTime = self.OnUpdateTime()
         if boiler_enabled != 1:
-            page_refresh = page_refresh * 2
+            heat_Interval = heat_Interval * 2
         html_text = """
         <div class="container-fluid bg-2 text-center">
             <h2>Heating Status @ {} <span class="badge">{}</span></h2>
         </div>
-        <main id="content" role="main">""".format(theTime, page_refresh)
+        <main id="content" role="main">""".format(theTime, heat_Interval)
         return html_text
     
     def roomTable(self, roomTemps):
@@ -407,7 +407,7 @@ class CreateUIPage():
         variables = VAR.variableData()
         for item in variables:
             if len(item) > 3:
-                _text = item.split('=')
+                _text = item.split(',')
                 pageText.append("""
                 <div class="form-group">
                     <label class="control-label col-xs-3" for="{0}">{0}:</label>

@@ -5,7 +5,10 @@ Created on 3 Dec 2015
 '''
 
 class Variables(object):
-
+    """
+    Reads and writes the variables.txt file.
+    Keys and variables separated by a comma
+    """
         
     def readVariables(self, variableName):
         """
@@ -18,7 +21,7 @@ class Variables(object):
         output = []
         for variable in variableName:
             for lines in data:
-                line = lines.split('=')
+                line = lines.split(',')
                 if line[0] == variable:
                     try:
                         output.append(int(line[1]))
@@ -28,7 +31,6 @@ class Variables(object):
             output = output[0]
         return output
                     
-                
     def writeVariable(self, variables):
         """
         Accepts List of Variable lists to change
@@ -36,14 +38,13 @@ class Variables(object):
         data = self.variableData()
         for change in variables:
             for i in range(len(data)):
-                if data[i].split('=')[0] == change[0]:
-                    data[i] = "{}={}".format(change[0],change[1])
-                    
+                if data[i].split(',')[0] == change[0]:
+                    data[i] = "{},{}".format(change[0],change[1])
         #print data
         with open('variables.txt', 'w') as f:
             for items in data:
-                #print items
-                print>>f, items
+                if ',' in items:
+                    print>>f, items
                 
     def variableData(self):
         with open('variables.txt', 'r') as f:

@@ -12,7 +12,7 @@ test change
 
 from __future__ import division
 
-__updated__ = "2015-12-05"
+__updated__ = "2015-12-06"
 
 
 import socket   #for sockets
@@ -43,7 +43,6 @@ valves = {}
 valveList = []
 message = ""
 validData = False
-veraControl = "http://{}:{}/data_request?id=lu_action&output_format=xml&DeviceNum={}&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue={}"
 boilerOn = 0
 weekDays = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
 outsideTempCheck = 0
@@ -297,7 +296,7 @@ class MainWindow():
         global outsideTempCheck
         logTime = time.time()
         
-        boilerEnabled, Vera_Address, Vera_Port, Vera_Device = VAR.readVariables(['BoilerEnabled', 'VeraIP', 'VeraPort', 'VeraDevice'])
+        boilerEnabled, veraControl, Vera_Address, Vera_Port, Vera_Device = VAR.readVariables(['BoilerEnabled', 'VeraControl', 'VeraIP', 'VeraPort', 'VeraDevice'])
         
         roomTemps = CUI.createRooms()
         
@@ -327,26 +326,25 @@ class MainWindow():
         
         # Update Temps database
         DB.insertTemps(roomTemps)
+        
+        print veraControl
+        print veraControl.format(Vera_Address, Vera_Port, Vera_Device, str(boilerState))
 
         if boilerEnabled:
             try:
                 _ = requests.get(veraControl.format(Vera_Address, Vera_Port, Vera_Device, str(boilerState)), timeout=5)
-                #DB.updateVeraState(1)
                 VAR.writeVariable([['VeraOK', 1]])
                 print 'message sent to Vera'
             except:
-                #DB.updateVeraState(0)
                 VAR.writeVariable([['VeraOK', 0]])
                 print "vera is unreachable"
         else:
             boilerState = 0
             try:
                 _ = requests.get(veraControl.format(Vera_Address, Vera_Port, Vera_Device, boilerState), timeout=5)
-                #DB.updateVeraState(1)
                 VAR.writeVariable([['VeraOK', 1]])
                 print "Boiler is Disabled"
             except:
-                #DB.updateVeraState(0)
                 VAR.writeVariable([['VeraOK', 0]])
                 print "vera is unreachable"
         try:
