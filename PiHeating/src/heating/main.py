@@ -327,8 +327,8 @@ class MainWindow():
         # Update Temps database
         DB.insertTemps(roomTemps)
         
-        print veraControl
-        print veraControl.format(Vera_Address, Vera_Port, Vera_Device, str(boilerState))
+        #print veraControl
+        #print veraControl.format(Vera_Address, Vera_Port, Vera_Device, str(boilerState))
 
         if boilerEnabled:
             try:
