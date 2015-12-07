@@ -12,7 +12,7 @@ test change
 
 from __future__ import division
 
-__updated__ = "2015-12-06"
+__updated__ = "2015-12-07"
 
 
 import socket   #for sockets
@@ -32,6 +32,8 @@ from requesthandler import MyRequestHandler
 from database import DbUtils
 from webui import CreateUIPage
 from variables import Variables
+from sendmessage import SendMessage
+SM = SendMessage()
 VAR = Variables()
 CUI = CreateUIPage()
 DB = DbUtils()
@@ -66,6 +68,7 @@ class MainWindow():
         #web_IP, web_Port = VAR.readVariables(('WebIP','WebPort'))
         #print 'variables read ', web_IP, ' : ', web_Port
         #VAR.writeVariable( [['Interval', 125],['PageRefresh', 55],['CubeOk', 1]] )
+        print SM.s_Command('1163A5', 1, 'MANUAL', 16.5)
         
         
         
