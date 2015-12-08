@@ -99,9 +99,12 @@ class CreateUIPage():
                         valveOpen     = valves[1]
                         valveSetPoint = valves[2]
                         valvesTemp    = valves[3]
+                        valvesMode    = valves[4]
+                        valvesLink    = valves[5]
+                        valvesBatt    = valves[6]
                         
                         if valveID == devices[0]: # valve is in current room
-                            roomDetails = (roomText,roomNumber,valveOpen,valveSetPoint,valvesTemp)
+                            roomDetails = (roomText,roomNumber,valveOpen,valveSetPoint,valvesTemp,valvesMode,valvesLink,valvesBatt)
                             roomValves.append(roomDetails)
                             
                             #print roomValves
@@ -110,13 +113,14 @@ class CreateUIPage():
                 roomName = i[0]
                 roomSetpoint = i[3]
                 actualTemp = i[4]
+                roomMode = i[5]
                 if i[2] == 999:
                     wallTemp = i[4]
                 else:
                     roomOpen = i[2]
             if wallTemp != 999:
                 actualTemp = wallTemp
-            msg = (roomName,logTime,roomSetpoint,actualTemp,roomOpen)
+            msg = (roomName,logTime,roomSetpoint,actualTemp,roomOpen,roomMode)
             roomTemps.append(msg)
         return roomTemps
         
@@ -283,6 +287,7 @@ class CreateUIPage():
             <div class="container-fluid bg-3">
           <div class="btn-group btn-group-justified">
             <a href="#" class="btn btn-default btn-lg">ROOM</a>
+            <a href="#" class="btn btn-default btn-lg">MODE</a>
             <a href="#" class="btn btn-default btn-lg">SET TEMP &#8451</a>
             <a href="#" class="btn btn-default btn-lg">TEMP &#8451</a>
             <a href="#" class="btn btn-default btn-lg">VALVE %</a>
@@ -293,6 +298,7 @@ class CreateUIPage():
             setTemp  = rooms[2]
             truTemp  = rooms[3]
             valvePos = rooms[4]
+            roomMode = rooms[5]
             if valvePos > 35:      # how far valve is open
                 cold_text = 'btn-info'
             else:
@@ -313,11 +319,12 @@ class CreateUIPage():
 
             pageText.append("""</ul>
                         </div>
+                        <a href="#" class="btn {0} btn-lg">{5}</a>
                         <a href="#" class="btn {0} btn-lg">{2}</a>
                         <a href="#" class="btn {0} btn-lg">{3}</a>
                         <a href="#" class="btn {0} btn-lg">{4}</a>
                     </div>
-                    """.format(cold_text,roomText,setTemp,truTemp,valvePos))
+                    """.format(cold_text,roomText,setTemp,truTemp,valvePos,roomMode))
         pageText.append("""
         </div>""")
         maxLayout = ''.join(pageText)

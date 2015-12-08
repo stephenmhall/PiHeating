@@ -39,7 +39,10 @@ class DbUtils():
                         (RFAddress TEXT NOT NULL PRIMARY KEY,
                          ValvePos INT,
                          SetTemp TEXT,
-                         ActTemp TEXT)
+                         ActTemp TEXT,
+                         Mode TEXT,
+                         LinkStatus INTEGER,
+                         Battery INTEGER)
                         """)
         
         cursor.execute("""CREATE TABLE IF NOT EXISTS boiler
@@ -56,7 +59,8 @@ class DbUtils():
                          SetTemp TEXT,
                          ActTemp TEXT,
                          ValvePos INTEGER,
-                         OutsideTemp TEXT)
+                         OutsideTemp TEXT,
+                         RoomMode TEXT)
                         """)
         
         
@@ -65,8 +69,8 @@ class DbUtils():
         conn = sqlite3.connect(dataBase)
         cursor = conn.cursor()
         with conn:
-            cursor.executemany("INSERT or REPLACE into temps(ID,RoomName,time,SetTemp,ActTemp,ValvePos,OutsideTemp)\
-                                VALUES(NULL, ?, ?, ?, ?, ?, ?)", msg)
+            cursor.executemany("INSERT or REPLACE into temps(ID,RoomName,time,SetTemp,ActTemp,ValvePos,OutsideTemp,RoomMode)\
+                                VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)", msg)
             
             
     def updateCube(self, msg):
@@ -128,8 +132,8 @@ class DbUtils():
         try:
             conn = sqlite3.connect(dataBase)
             cursor = conn.cursor()
-            cursor.executemany("INSERT or REPLACE into valves(RFAddress,ValvePos,SetTemp,ActTemp)\
-                                 VALUES(?, ?, ?, ?)", msg)
+            cursor.executemany("INSERT or REPLACE into valves(RFAddress,ValvePos,SetTemp,ActTemp,Mode,LinkStatus,Battery)\
+                                 VALUES(?, ?, ?, ?, ?, ?, ?)", msg)
             #print "Committing Database"
             conn.commit()
             

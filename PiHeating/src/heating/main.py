@@ -179,6 +179,21 @@ class MainWindow():
             valve_temp = 0xFF
             valve_curtemp = 0xFF
 
+            valve_info_string = '{0}{{:{1}>{2}}}'.format('ob', 0, 8).format(bin(valve_info)[2:])
+            valve_mode = str(valve_info_string[8:])
+
+            if valve_mode == '00':
+                valve_MODE = 'AUTO'
+            elif valve_mode == '01':
+                valve_MODE = 'MANUAL'
+            elif valve_mode == '11':
+                valve_MODE = 'BOOST'
+            elif valve_mode == '10':
+                valve_MODE = 'VACATION'
+            
+            link_status = int(valve_info_string[3:4])
+            battery_status = int(valve_info_string[2:3])
+            
             # WallMountedThermostat (dev_type 3)
             if dev_len == 13:
                 valve_pos = 999
@@ -196,15 +211,15 @@ class MainWindow():
             elif dev_len == 7:
                 pass
             
-            valves.update({valve_adr: [valve_pos, valve_temp, valve_curtemp]})
+            valves.update({valve_adr: [valve_pos, valve_temp, valve_curtemp, valve_MODE, link_status, battery_status]})
             # save status and info
-            devices[valve_adr][6] = valve_status
-            devices[valve_adr][7] = valve_info
+            #devices[valve_adr][6] = valve_status
+            #devices[valve_adr][7] = valve_info
             es_pos += dev_len
             
         dbMessage = []
         for keys in valves:
-            dbList = keys,valves[keys][0],valves[keys][1],valves[keys][2]
+            dbList = keys,valves[keys][0],valves[keys][1],valves[keys][2],valves[keys][3],valves[keys][4],valves[keys][5]
             dbMessage.append(dbList)
         DB.updateValves(dbMessage)
             
