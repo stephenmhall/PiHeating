@@ -68,7 +68,7 @@ class MainWindow():
         #web_IP, web_Port = VAR.readVariables(('WebIP','WebPort'))
         #print 'variables read ', web_IP, ' : ', web_Port
         #VAR.writeVariable( [['Interval', 125],['PageRefresh', 55],['CubeOk', 1]] )
-        sCommand = SM.s_Command('1163A5', 1, 'MANUAL', 19)
+        #sCommand = SM.s_Command('1163A5', 1, 'MANUAL', 19)
         #SM.sendMAX(sCommand)
         
         
