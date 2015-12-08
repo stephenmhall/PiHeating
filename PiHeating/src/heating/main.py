@@ -178,7 +178,7 @@ class MainWindow():
             valve_info = ord(es[es_pos + 0x06])
             valve_temp = 0xFF
             valve_curtemp = 0xFF
-            print 'valve RF : ',valve_adr, ' valve status: ',valve_status, ' valve info : ', valve_info 
+
             # WallMountedThermostat (dev_type 3)
             if dev_len == 13:
                 valve_pos = 999
