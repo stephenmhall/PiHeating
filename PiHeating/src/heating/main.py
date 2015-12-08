@@ -12,7 +12,7 @@ test change
 
 from __future__ import division
 
-__updated__ = "2015-12-07"
+__updated__ = "2015-12-08"
 
 
 import socket   #for sockets
@@ -68,7 +68,8 @@ class MainWindow():
         #web_IP, web_Port = VAR.readVariables(('WebIP','WebPort'))
         #print 'variables read ', web_IP, ' : ', web_Port
         #VAR.writeVariable( [['Interval', 125],['PageRefresh', 55],['CubeOk', 1]] )
-        print SM.s_Command('1163A5', 1, 'MANUAL', 16.5)
+        sCommand = SM.s_Command('1163A5', 1, 'MANUAL', 19)
+        #SM.sendMAX(sCommand)
         
         
         
@@ -165,8 +166,11 @@ class MainWindow():
     def maxCmd_L(self, line):
         """ process L response """
         line = line.split(":")
+        #print line
         es = base64.b64decode(line[1])
+        #print es
         es_pos = 0
+        
         while (es_pos < len(es)):
             dev_len = ord(es[es_pos]) + 1
             valve_adr = self.hexify(es[es_pos + 1:es_pos + 4])
@@ -174,6 +178,7 @@ class MainWindow():
             valve_info = ord(es[es_pos + 0x06])
             valve_temp = 0xFF
             valve_curtemp = 0xFF
+            print 'valve RF : ',valve_adr, ' valve status: ',valve_status, ' valve info : ', valve_info 
             # WallMountedThermostat (dev_type 3)
             if dev_len == 13:
                 valve_pos = 999
@@ -196,6 +201,7 @@ class MainWindow():
             devices[valve_adr][6] = valve_status
             devices[valve_adr][7] = valve_info
             es_pos += dev_len
+            
         dbMessage = []
         for keys in valves:
             dbList = keys,valves[keys][0],valves[keys][1],valves[keys][2]
@@ -284,8 +290,8 @@ class MainWindow():
         Get Current outside temperature from OpenWeatherMap using the API
         """
         try:
-            userKey = VAR.readVariables(['WeatherKey'])
-            f = urllib2.urlopen('http://api.openweathermap.org/data/2.5/weather?id=6640068&APPID={}'.format(userKey))
+            cityID, userKey = VAR.readVariables(['WeatherCityID', 'WeatherKey'])
+            f = urllib2.urlopen('http://api.openweathermap.org/data/2.5/weather?id={}&APPID={}'.format(cityID,userKey))
             json_string = f.read()
             parsed_json = json.loads(json_string)
             temp_c = parsed_json['main']['temp'] # kelvin -273.15
@@ -299,7 +305,16 @@ class MainWindow():
         global outsideTempCheck
         logTime = time.time()
         
-        boilerEnabled, veraControl, Vera_Address, Vera_Port, Vera_Device = VAR.readVariables(['BoilerEnabled', 'VeraControl', 'VeraIP', 'VeraPort', 'VeraDevice'])
+        boilerEnabled, veraControl, Vera_Address, Vera_Port, \
+        Vera_Device, singleRadThreshold, multiRadThreshold, \
+        multiRadCount = VAR.readVariables(['BoilerEnabled', 
+                                           'VeraControl', 
+                                           'VeraIP', 
+                                           'VeraPort', 
+                                           'VeraDevice',
+                                           'SingleRadThreshold',
+                                           'MultiRadThreshold',
+                                           'MultiRadCount'])
         
         roomTemps = CUI.createRooms()
         
@@ -317,10 +332,10 @@ class MainWindow():
         for room in roomTemps:
             valveList.append(room[4])
 
-        singleRadOn = sum(i >= 80 for i in valveList)
-        multiradOn  = sum(i >= 60 for i in valveList)
+        singleRadOn = sum(i >= singleRadThreshold for i in valveList)
+        multiradOn  = sum(i >= multiRadThreshold for i in valveList)
         
-        if singleRadOn >= 1 or multiradOn >= 2:
+        if singleRadOn >= 1 or multiradOn >= multiRadCount:
             boilerState = 1
         else:
             boilerState = 0
@@ -335,7 +350,8 @@ class MainWindow():
 
         if boilerEnabled:
             try:
-                _ = requests.get(veraControl.format(Vera_Address, Vera_Port, Vera_Device, str(boilerState)), timeout=5)
+                _ = requests.get(veraControl.format(Vera_Address, Vera_Port, 
+                                                    Vera_Device, str(boilerState)), timeout=5)
                 VAR.writeVariable([['VeraOK', 1]])
                 print 'message sent to Vera'
             except:
@@ -344,7 +360,8 @@ class MainWindow():
         else:
             boilerState = 0
             try:
-                _ = requests.get(veraControl.format(Vera_Address, Vera_Port, Vera_Device, boilerState), timeout=5)
+                _ = requests.get(veraControl.format(Vera_Address, Vera_Port, 
+                                                    Vera_Device, boilerState), timeout=5)
                 VAR.writeVariable([['VeraOK', 1]])
                 print "Boiler is Disabled"
             except:
