@@ -59,7 +59,7 @@ class MakeGraph():
             setPoint = lines[3]
             realTemp = float(lines[4])
             valvePos = lines[5] / 10.0
-            outsideTemp = lines[6]
+            outsideTemp = lines[7]
             
             try:
                 outsideTemp = float(outsideTemp)

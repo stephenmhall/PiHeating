@@ -59,8 +59,8 @@ class DbUtils():
                          SetTemp TEXT,
                          ActTemp TEXT,
                          ValvePos INTEGER,
-                         OutsideTemp TEXT,
-                         RoomMode TEXT)
+                         RoomMode TEXT,
+                         OutsideTemp TEXT)
                         """)
         
         
@@ -69,7 +69,7 @@ class DbUtils():
         conn = sqlite3.connect(dataBase)
         cursor = conn.cursor()
         with conn:
-            cursor.executemany("INSERT or REPLACE into temps(ID,RoomName,time,SetTemp,ActTemp,ValvePos,OutsideTemp,RoomMode)\
+            cursor.executemany("INSERT or REPLACE into temps(ID,RoomName,time,SetTemp,ActTemp,ValvePos,RoomMode,OutsideTemp)\
                                 VALUES(NULL, ?, ?, ?, ?, ?, ?, ?)", msg)
             
             

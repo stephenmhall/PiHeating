@@ -256,6 +256,10 @@ class CreateUIPage():
                     padding-top: 20px;
                     padding-bottom: 20px;
                 }
+                h2 {
+                    font-size: 3vw
+                }
+                
               </style>
         </head>
         <body onload=display_ct();>""")
@@ -286,11 +290,11 @@ class CreateUIPage():
         pageText.append("""
             <div class="container-fluid bg-3">
           <div class="btn-group btn-group-justified">
-            <a href="#" class="btn btn-default btn-lg">ROOM</a>
-            <a href="#" class="btn btn-default btn-lg">MODE</a>
-            <a href="#" class="btn btn-default btn-lg">SET TEMP &#8451</a>
-            <a href="#" class="btn btn-default btn-lg">TEMP &#8451</a>
-            <a href="#" class="btn btn-default btn-lg">VALVE %</a>
+            <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>ROOM</B></a>
+            <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>MODE</B></a>
+            <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>SET TEMP &#8451</B></a>
+            <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>TEMP &#8451</B></a>
+            <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>VALVE %</B></a>
           </div>
               """)
         for rooms in roomTemps:
@@ -307,7 +311,8 @@ class CreateUIPage():
             pageText.append("""
                 <div class="btn-group btn-group-justified">
                     <div class="btn btn-group">
-                        <a class="btn btn-primary btn-lg dropdown-toggle" data-toggle="dropdown" href="#">
+                        <a class="btn btn-primary btn-lg dropdown-toggle" data-toggle="dropdown" href="#"
+                        style="font-size: 1.8vw;">
                         {} 
                         <span class="caret"></span>
                     </a>
@@ -319,10 +324,10 @@ class CreateUIPage():
 
             pageText.append("""</ul>
                         </div>
-                        <a href="#" class="btn {0} btn-lg">{5}</a>
-                        <a href="#" class="btn {0} btn-lg">{2}</a>
-                        <a href="#" class="btn {0} btn-lg">{3}</a>
-                        <a href="#" class="btn {0} btn-lg">{4}</a>
+                        <a href="#" class="btn {0} btn-lg" style="font-size: 1.8vw;">{5}</a>
+                        <a href="#" class="btn {0} btn-lg" style="font-size: 1.8vw;">{2}</a>
+                        <a href="#" class="btn {0} btn-lg" style="font-size: 1.8vw;">{3}</a>
+                        <a href="#" class="btn {0} btn-lg" style="font-size: 1.8vw;">{4}</a>
                     </div>
                     """.format(cold_text,roomText,setTemp,truTemp,valvePos,roomMode))
         pageText.append("""
