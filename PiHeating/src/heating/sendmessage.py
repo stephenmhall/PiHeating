@@ -5,6 +5,7 @@ Created on 6 Dec 2015
 '''
 
 import requests
+import binascii
 import socket
 import sys
 import base64
@@ -65,19 +66,17 @@ class SendMessage(object):
             
         commandString = self.baseString + self.rfAddress + self.roomID + bits
         print 'command string : ', commandString
-        commandString = base64.b64encode(commandString)
+        commandString = self.hextoBase64(commandString)
         print 'encoded string : ', commandString
         return commandString
     
+    def hextoBase64(self, hexnumber):
+        hex = hexnumber.decode("hex")
+        base = binascii.b2a_base64(hex)
+        return base
+    
     def sendMAX(self, commandString):
-        sendString = 's:{}'.format(commandString)
-#         maxIP, maxPort = VAR.readVariables(['MaxIP', 'MaxPort'])
-#         print 'sending s command to Max : ', sendString
-#         try:
-#             r = requests.get(sendString, timeout=5)
-#             print r.text
-#         except:
-#             pass
+        sendString = 's:{}\r\n'.format(commandString)
         Max_IP, Max_Port = VAR.readVariables(['MaxIP', 'MaxPort'])
         print 'Max Connection Starting on : ',Max_IP, Max_Port
         try:

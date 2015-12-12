@@ -12,7 +12,7 @@ test change
 
 from __future__ import division
 
-__updated__ = "2015-12-08"
+__updated__ = "2015-12-12"
 
 
 import socket   #for sockets
@@ -68,8 +68,8 @@ class MainWindow():
         #web_IP, web_Port = VAR.readVariables(('WebIP','WebPort'))
         #print 'variables read ', web_IP, ' : ', web_Port
         #VAR.writeVariable( [['Interval', 125],['PageRefresh', 55],['CubeOk', 1]] )
-        #sCommand = SM.s_Command('1163A5', 1, 'MANUAL', 19)
-        #SM.sendMAX(sCommand)
+        sCommand = SM.s_Command('1163A5', 1, 'MANUAL', 19)
+        SM.sendMAX(sCommand)
         
         
         
@@ -387,15 +387,15 @@ class MainWindow():
         except:
             boilerOn = 9
             
-        # Create UI Pages
-        CUI.saveUI(roomTemps)
-        CUI.saveAdminUI()
-
         if boilerState != boilerOn:
             msg = (logTime,boilerState)
             #print 'switch heat DB message ', msg
             DB.updateBoiler(msg)
         boilerOn = boilerState
+        
+        # Create UI Pages
+        CUI.saveUI(roomTemps)
+        CUI.saveAdminUI()
             
         
     def doLoop(self):
