@@ -26,6 +26,11 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             self.path="/index.html"
             self.updateUIPages(roomTemps)
             
+        elif self.path[0:10] == '/heatcheck':
+            roomData = self.path
+            
+            self.path="/index.html"
+            
         elif self.path[0:5] == '/mode':
             roomData = self.path
             SendMessage().updateRoom(roomData)
@@ -127,7 +132,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
         
     def do_POST(self):
         roomTemps = CUI.createRooms()
-        #print 'POST ', self.path
+        print 'POST ', self.path
         if self.path == "/admin":
             self.path = "/admin.html"
             form = cgi.FieldStorage(

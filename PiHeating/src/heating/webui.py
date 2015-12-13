@@ -179,6 +179,11 @@ class CreateUIPage():
                   window.history.go(0);
               }
               
+                function load_index(){
+                    sleep(2000);
+                    document.getElementById("content").innerHTML='<object type="text/html" data="index.html" ></object>';
+                }
+              
                   $(document).ready(function(){
                     $('.dropdown-toggle').dropdown()
                     
@@ -395,17 +400,6 @@ class CreateUIPage():
         except:
             heating_state = 0
         duty_cycle = DB.getCubes()[3]
-#         heating_variables = DB.getVariables()
-#         boiler_state = heating_variables[5]
-#         cube_state = heating_variables[10]
-#         vera_state = heating_variables[11]
-#             <div class="btn-group btn-group-justified">
-#                 <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>HOUSE/B></a>
-#                 <a href="/mode?AUTO?ALL?0" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>AUTO</B></a>
-#                 <a href="/mode?ECO?ALL?0" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>ECO</B></a>
-#                 <a href="/mode?COMFORT?C" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>COMFORT</B></a>
-#                 <a href="/mode?CUSTOM?19.0" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>CUSTOM</B></a>
-#             </div>
 
         boiler_state, cube_state, vera_state = VAR.readVariables(['BoilerEnabled', 'CubeOK', 'VeraOK'])
         heating_cycle = self.dutyCycle()
@@ -439,7 +433,7 @@ class CreateUIPage():
         <input type="hidden" name="confirm" value="1" />
         <div class="btn-group">
             <input type="submit" class="btn {}
-            <button type="button" class="btn {}<span class="badge">{}%</span></button>
+            <a href="/heatcheck" class="btn {}<span class="badge">{}%</span></a>
             <button type="button" class="btn {}<span class="badge">{}</span></button>
             <button type="button" class="btn {}</button>
         </form>
@@ -455,7 +449,7 @@ class CreateUIPage():
         <div class="container-fluid bg-3 text-center">
             <div class="btn-group btn-group-lg">
                 <a href="/admin.html" class="btn btn-warning" role="button">Admin Page</a>
-                <button type="button" class="btn btn-primary" onClick="refreshPage();">Refresh Page <span class="badge">{}</span></button>
+                <a href="/index.html" class="btn btn-primary" role="button">Refresh Page <span class="badge">{}</span></a>
             </div>
         </div>""".format(webRefresh)
         return html_text
@@ -467,7 +461,7 @@ class CreateUIPage():
         <div class="container-fluid bg-3 text-center">
             <div class="btn-group btn-group-lg">
                 <a href="/index.html" class="btn btn-warning" role="button">Main UI</a>
-                <button type="button" class="btn btn-primary" onClick="refreshPage();">Refresh Page <span class="badge">{}</span></button>
+                <a href="/index.html" class="btn btn-primary" role="button">Refresh Page <span class="badge">{}</span></a>
             </div>
         </div>""".format(webRefresh)
         return html_text
