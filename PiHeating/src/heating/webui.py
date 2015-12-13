@@ -130,7 +130,7 @@ class CreateUIPage():
         
     def pageTop(self):
         #webRefresh = DB.getVariables()[12]
-        webRefresh = VAR.readVariables(['PageRefresh'])
+        webRefresh, baseFontSize = VAR.readVariables(['PageRefresh', 'BaseFontSize'])
         pageText = []
         pageText.append("""
         <!DOCTYPE html>
@@ -264,16 +264,16 @@ class CreateUIPage():
                     color: #555555;
                 }
                 .container-fluid {
-                    padding-top: 20px;
-                    padding-bottom: 20px;
+                    padding-top: 10px;
+                    padding-bottom: 10px;
                 }
                 h2 {
-                    font-size: 3vw
+                    font-size: %svw
                 }
                 
               </style>
         </head>
-        <body onload=display_ct();>""")
+        <body onload=display_ct();>""" % baseFontSize)
         html_text = ''.join(pageText)
         return html_text
     
@@ -297,27 +297,28 @@ class CreateUIPage():
         return html_text
     
     def roomTable(self, roomTemps):
+        baseFontSize = float(VAR.readVariables(['BaseFontSize']))
         pageText = []
         pageText.append("""
             <div class="container-fluid bg-3">
             <div class="well well-sm">
             <div class="btn-group btn-group-justified">
-                <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>HOUSE MODE</B></a>
-                <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><span class="glyphicon glyphicon-time"></span><B> AUTO</B></a>
-                <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><span class="glyphicon glyphicon-leaf"></span><B> ECO</B></a>
-                <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><span class="glyphicon glyphicon-asterisk"></span><B> COMFORT</B></a>
-                <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><span class="glyphicon glyphicon-pencil"></span><B> CUSTOM</B></a>
+                <a href="#" class="btn btn-default btn-lg" style="font-size: {0}vw;"><B>HOUSE MODE</B></a>
+                <a href="#" class="btn btn-default btn-lg" style="font-size: {0}vw;"><span class="glyphicon glyphicon-time"></span><B> AUTO</B></a>
+                <a href="#" class="btn btn-default btn-lg" style="font-size: {0}vw;"><span class="glyphicon glyphicon-leaf"></span><B> ECO</B></a>
+                <a href="#" class="btn btn-default btn-lg" style="font-size: {0}vw;"><span class="glyphicon glyphicon-asterisk"></span><B> COMFORT</B></a>
+                <a href="#" class="btn btn-default btn-lg" style="font-size: {0}vw;"><span class="glyphicon glyphicon-pencil"></span><B> CUSTOM</B></a>
             </div>
             </div>
             <div class="well well-sm">
             <div class="btn-group btn-group-justified">
-                <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>ROOM</B></a>
-                <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>MODE</B></a>
-                <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>SET TEMP &#8451</B></a>
-                <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>TEMP &#8451</B></a>
-                <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>VALVE %</B></a>
+                <a href="#" class="btn btn-default btn-lg" style="font-size: {0}vw;"><B>ROOM</B></a>
+                <a href="#" class="btn btn-default btn-lg" style="font-size: {0}vw;"><B>MODE</B></a>
+                <a href="#" class="btn btn-default btn-lg" style="font-size: {0}vw;"><B>SET TEMP &#8451</B></a>
+                <a href="#" class="btn btn-default btn-lg" style="font-size: {0}vw;"><B>TEMP &#8451</B></a>
+                <a href="#" class="btn btn-default btn-lg" style="font-size: {0}vw;"><B>VALVE %</B></a>
             </div>
-              """)
+              """.format(baseFontSize - 1.2))
         for rooms in roomTemps:
             roomText = rooms[0]
             setTemp  = rooms[2]
@@ -334,12 +335,12 @@ class CreateUIPage():
                 <div class="btn-group btn-group-justified">
                     <div class="btn btn-group">
                         <a class="btn btn-primary btn-lg dropdown-toggle" data-toggle="dropdown" href="#"
-                        style="font-size: 1.8vw;">
+                        style="font-size: {}vw;">
                         {} 
                         <span class="caret"></span>
                     </a>
                     <ul class="dropdown-menu">
-                        """.format(roomText))
+                        """.format(baseFontSize - 1.2, roomText))
             for i in range(1, 7):
                 pageText.append("""<li><a href="/graph?{0}?{1}">Graph {1} - Day(s)</a></li>
                 """.format(roomText,i))
@@ -350,15 +351,15 @@ class CreateUIPage():
             pageText.append("""
             <div class="btn-group">
                 <a class="btn {0} btn-lg dropdown-toggle btn-mode" data-toggle="dropdown" href="#"
-                style="font-size: 1.8vw;">
+                style="font-size: {2}vw;">
                 {1}
                 <span class="caret"></span>
             </a>
             <ul class="dropdown-menu">
-            """.format(cold_text,roomMode))
+            """.format(cold_text,roomMode,baseFontSize - 1.2))
             
             for mode in roomModes:
-                pageText.append("""<li><a href="/mode?{0}?{1}?{2}">{0}</a></li>
+                pageText.append("""<li><a href="/mode?{0}?{1}?{2}>{0}</a></li>
                 """.format(mode, roomText, setTemp))
 
             pageText.append("""</ul>
@@ -368,12 +369,12 @@ class CreateUIPage():
             pageText.append("""
             <div class="btn btn-group">
                 <a class="btn {} btn-lg dropdown-toggle" data-toggle="dropdown" href="#"
-                style="font-size: 1.8vw;">
+                style="font-size: {}vw;">
                 {} 
                 <span class="caret"></span>
             </a>
             <ul class="dropdown-menu">
-            """.format(cold_text,setTemp))
+            """.format(cold_text,baseFontSize - 1.2, setTemp))
             
             for i in range(20, 50):
                 pageText.append("""<li><a href="/mode?{0}?{1}?{2}">{2}</a></li>
@@ -383,10 +384,10 @@ class CreateUIPage():
                         </div>""")                                 
             
             pageText.append("""
-            <a href="#" class="btn {0} btn-lg" style="font-size: 1.8vw;">{3}</a>
-            <a href="#" class="btn {0} btn-lg" style="font-size: 1.8vw;">{4}</a>
+            <a href="#" class="btn {0} btn-lg" style="font-size: {5}vw;">{3}</a>
+            <a href="#" class="btn {0} btn-lg" style="font-size: {5}vw;">{4}</a>
         </div>
-        """.format(cold_text,roomText,setTemp,truTemp,valvePos))
+        """.format(cold_text,roomText,setTemp,truTemp,valvePos,baseFontSize - 1.2))
         pageText.append("""
         </div>
         </div>""")

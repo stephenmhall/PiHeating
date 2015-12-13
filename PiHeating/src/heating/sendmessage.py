@@ -12,6 +12,7 @@ import sys
 from variables import Variables
 from database import DbUtils
 from webui import CreateUIPage
+
 VAR = Variables()
 
 class SendMessage(object):

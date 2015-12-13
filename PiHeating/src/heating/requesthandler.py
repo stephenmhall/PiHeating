@@ -3,12 +3,14 @@ from BaseHTTPServer import BaseHTTPRequestHandler
 import cgi
 from os import curdir, sep, system, execl
 from sys import platform as _platform, executable, argv
+import time
 #from database import DbUtils
 #DB=DbUtils()
 from webui import CreateUIPage
 from graphing import MakeGraph
 from variables import Variables
 from sendmessage import SendMessage
+from max import Max
 #SM = SendMessage()
 VAR = Variables()
 CUI = CreateUIPage()
@@ -28,13 +30,15 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             
         elif self.path[0:10] == '/heatcheck':
             roomData = self.path
-            
+            Max().checkHeat()
             self.path="/index.html"
             
         elif self.path[0:5] == '/mode':
             roomData = self.path
             SendMessage().updateRoom(roomData)
             self.path="/index.html"
+            time.sleep(1)
+            Max().checkHeat()
             
         elif self.path[0:6] == '/graph':
             roomName = self.path
