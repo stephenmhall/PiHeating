@@ -8,6 +8,8 @@ from sys import platform as _platform, executable, argv
 from webui import CreateUIPage
 from graphing import MakeGraph
 from variables import Variables
+from sendmessage import SendMessage
+#SM = SendMessage()
 VAR = Variables()
 CUI = CreateUIPage()
 GRAPH = MakeGraph()
@@ -23,6 +25,11 @@ class MyRequestHandler(BaseHTTPRequestHandler):
         if self.path=="/":
             self.path="/index.html"
             self.updateUIPages(roomTemps)
+            
+        elif self.path[0:5] == '/mode':
+            roomData = self.path
+            SendMessage().updateRoom(roomData)
+            self.path="/index.html"
             
         elif self.path[0:6] == '/graph':
             roomName = self.path

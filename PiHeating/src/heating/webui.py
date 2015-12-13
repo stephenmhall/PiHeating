@@ -11,6 +11,10 @@ class CreateUIPage():
         Create UI Webpage
         """
         
+    def updateWebUI(self):
+        roomTemps = self.createRooms()
+        self.saveUI(roomTemps)
+        
     def saveUI(self, roomTemps):
         #print 'SAVE UI'
         self.dutyCycle()
@@ -179,6 +183,8 @@ class CreateUIPage():
                     $('.dropdown-toggle').dropdown()
                     
                 });
+                
+
             </script>
             <style>
             
@@ -289,13 +295,23 @@ class CreateUIPage():
         pageText = []
         pageText.append("""
             <div class="container-fluid bg-3">
-          <div class="btn-group btn-group-justified">
-            <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>ROOM</B></a>
-            <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>MODE</B></a>
-            <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>SET TEMP &#8451</B></a>
-            <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>TEMP &#8451</B></a>
-            <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>VALVE %</B></a>
-          </div>
+            <div class="well well-sm">
+            <div class="btn-group btn-group-justified">
+                <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>HOUSE MODE</B></a>
+                <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><span class="glyphicon glyphicon-time"></span><B> AUTO</B></a>
+                <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><span class="glyphicon glyphicon-leaf"></span><B> ECO</B></a>
+                <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><span class="glyphicon glyphicon-asterisk"></span><B> COMFORT</B></a>
+                <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><span class="glyphicon glyphicon-pencil"></span><B> CUSTOM</B></a>
+            </div>
+            </div>
+            <div class="well well-sm">
+            <div class="btn-group btn-group-justified">
+                <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>ROOM</B></a>
+                <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>MODE</B></a>
+                <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>SET TEMP &#8451</B></a>
+                <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>TEMP &#8451</B></a>
+                <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>VALVE %</B></a>
+            </div>
               """)
         for rooms in roomTemps:
             roomText = rooms[0]
@@ -303,11 +319,12 @@ class CreateUIPage():
             truTemp  = rooms[3]
             valvePos = rooms[4]
             roomMode = rooms[5]
+            roomModes = ['AUTO', 'MANUAL', 'BOOST', 'VACATION']
             if valvePos > 35:      # how far valve is open
                 cold_text = 'btn-info'
             else:
                 cold_text = 'btn-warning'
-                
+            # Add Room Buttons
             pageText.append("""
                 <div class="btn-group btn-group-justified">
                     <div class="btn btn-group">
@@ -323,14 +340,50 @@ class CreateUIPage():
                 """.format(roomText,i))
 
             pageText.append("""</ul>
-                        </div>
-                        <a href="#" class="btn {0} btn-lg" style="font-size: 1.8vw;">{5}</a>
-                        <a href="#" class="btn {0} btn-lg" style="font-size: 1.8vw;">{2}</a>
-                        <a href="#" class="btn {0} btn-lg" style="font-size: 1.8vw;">{3}</a>
-                        <a href="#" class="btn {0} btn-lg" style="font-size: 1.8vw;">{4}</a>
-                    </div>
-                    """.format(cold_text,roomText,setTemp,truTemp,valvePos,roomMode))
+                        </div>""")
+            #Add Mode buttons
+            pageText.append("""
+            <div class="btn-group">
+                <a class="btn {0} btn-lg dropdown-toggle btn-mode" data-toggle="dropdown" href="#"
+                style="font-size: 1.8vw;">
+                {1}
+                <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+            """.format(cold_text,roomMode))
+            
+            for mode in roomModes:
+                pageText.append("""<li><a href="/mode?{0}?{1}?{2}">{0}</a></li>
+                """.format(mode, roomText, setTemp))
+
+            pageText.append("""</ul>
+                        </div>""")
+            
+            #Add Set Temperature Buttons
+            pageText.append("""
+            <div class="btn btn-group">
+                <a class="btn {} btn-lg dropdown-toggle" data-toggle="dropdown" href="#"
+                style="font-size: 1.8vw;">
+                {} 
+                <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+            """.format(cold_text,setTemp))
+            
+            for i in range(20, 50):
+                pageText.append("""<li><a href="/mode?{0}?{1}?{2}">{2}</a></li>
+                """.format(roomMode, roomText, float(i)/2))
+
+            pageText.append("""</ul>
+                        </div>""")                                 
+            
+            pageText.append("""
+            <a href="#" class="btn {0} btn-lg" style="font-size: 1.8vw;">{3}</a>
+            <a href="#" class="btn {0} btn-lg" style="font-size: 1.8vw;">{4}</a>
+        </div>
+        """.format(cold_text,roomText,setTemp,truTemp,valvePos))
         pageText.append("""
+        </div>
         </div>""")
         maxLayout = ''.join(pageText)
         return maxLayout
@@ -346,6 +399,13 @@ class CreateUIPage():
 #         boiler_state = heating_variables[5]
 #         cube_state = heating_variables[10]
 #         vera_state = heating_variables[11]
+#             <div class="btn-group btn-group-justified">
+#                 <a href="#" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>HOUSE/B></a>
+#                 <a href="/mode?AUTO?ALL?0" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>AUTO</B></a>
+#                 <a href="/mode?ECO?ALL?0" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>ECO</B></a>
+#                 <a href="/mode?COMFORT?C" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>COMFORT</B></a>
+#                 <a href="/mode?CUSTOM?19.0" class="btn btn-default btn-lg" style="font-size: 1.8vw;"><B>CUSTOM</B></a>
+#             </div>
 
         boiler_state, cube_state, vera_state = VAR.readVariables(['BoilerEnabled', 'CubeOK', 'VeraOK'])
         heating_cycle = self.dutyCycle()
