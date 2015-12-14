@@ -25,14 +25,12 @@ class Max():
     
     def checkHeat(self):
         MAXData, validData = self.getData()
-        print MAXData, validData
         if validData:
             self.parseData(MAXData)
             self.switchHeat()
             
             
     def getData(self):
-        print 'getting data'
         validData = False
         message = ""
         Max_IP, Max_Port = Variables().readVariables(['MaxIP', 'MaxPort'])
