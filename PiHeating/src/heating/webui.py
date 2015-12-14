@@ -343,7 +343,7 @@ class CreateUIPage():
                         """.format(baseFontSize - 1.2, roomText))
             for i in range(1, 7):
                 pageText.append("""<li><a href="/graph?{0}?{1}">Graph {1} - Day(s)</a></li>
-                """.format(roomText,i))
+                        """.format(roomText,i))
 
             pageText.append("""</ul>
                         </div>""")
@@ -356,14 +356,14 @@ class CreateUIPage():
                 <span class="caret"></span>
             </a>
             <ul class="dropdown-menu">
-            """.format(cold_text,roomMode,baseFontSize - 1.2))
+                """.format(cold_text,roomMode,baseFontSize - 1.2))
             
             for mode in roomModes:
-                pageText.append("""<li><a href="/mode?{0}?{1}?{2}>{0}</a></li>
+                pageText.append("""<li><a href="/mode?{0}?{1}?{2}">{0}</a></li>
                 """.format(mode, roomText, setTemp))
 
             pageText.append("""</ul>
-                        </div>""")
+            </div>""")
             
             #Add Set Temperature Buttons
             pageText.append("""
@@ -374,7 +374,7 @@ class CreateUIPage():
                 <span class="caret"></span>
             </a>
             <ul class="dropdown-menu">
-            """.format(cold_text,baseFontSize - 1.2, setTemp))
+                """.format(cold_text,baseFontSize - 1.2, setTemp))
             
             for i in range(20, 50):
                 pageText.append("""<li><a href="/mode?{0}?{1}?{2}">{2}</a></li>

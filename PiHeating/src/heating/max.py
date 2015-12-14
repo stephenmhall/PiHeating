@@ -16,7 +16,6 @@ devices = {}
 valves = {}
 valveList = []
 message = ""
-validData = False
 boilerOn = 0
 weekDays = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
 outsideTempCheck = 0
@@ -26,9 +25,85 @@ class Max():
     
     def checkHeat(self):
         MAXData, validData = self.getData()
+        print MAXData, validData
         if validData:
             self.parseData(MAXData)
             self.switchHeat()
+            
+            
+    def getData(self):
+        print 'getting data'
+        validData = False
+        message = ""
+        Max_IP, Max_Port = Variables().readVariables(['MaxIP', 'MaxPort'])
+        print 'Max Connection Starting on : ',Max_IP, Max_Port
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(1)
+            print 'Socket Created'
+        except socket.error:
+            print 'Failed to create socket'
+            s.close()
+            sys.exit()
+             
+        #Connect to remote server
+        try:
+            s.connect((Max_IP, int(Max_Port)))
+            print 'Socket Connected to Max on ip ' + Max_IP
+        except:
+            s.close()
+            Variables().writeVariable([['CubeOK', 0]])
+            print "Unable to make connection Trying later"
+            CreateUIPage().updateWebUI()
+            return (message, validData)
+         
+        try:
+            while 1:
+                reply = s.recv(1024)
+                #print reply
+                message += reply
+        except:
+            print "Message ended"
+            
+        if message != "":
+            Variables().writeVariable([['CubeOK', 1]])
+            validData = True
+            
+        s.close()
+        return (message, validData) 
+    
+    def parseData(self, message):
+        print_on = int(Variables().readVariables(['PrintData']))
+        message = message.split('\r\n')
+    
+        for lines in message:
+            #print lines
+            try:
+                if lines[0] == 'H':
+                    self.maxCmd_H(lines)
+                elif lines[0] == 'M':
+                    self.maxCmd_M(lines, 0)
+                elif lines[0] == 'C':
+                    self.maxCmd_C(lines)
+                elif lines[0] == 'L':
+                    self.maxCmd_L(lines)
+                else:
+                    break
+            except:
+                pass
+    
+        if print_on:
+            for keys in maxDetails:
+                print keys, maxDetails[keys]
+            print "Rooms"
+            for keys in rooms:
+                print keys, rooms[keys]
+            print "devices"
+            for keys in devices:
+                print keys, devices[keys]
+            print "valves"
+            for keys in valves:
+                print keys, valves[keys]
     
     def hexify(self, tmpadr):
         """ returns hexified address """
@@ -163,79 +238,7 @@ class Max():
             dbMessage.append(dbList)
         DbUtils().updateValves(dbMessage)
             
-    def getData(self):
-        validData = False
-        message = ""
-        Max_IP, Max_Port = Variables().readVariables(['MaxIP', 'MaxPort'])
-        print 'Max Connection Starting on : ',Max_IP, Max_Port
-        try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.settimeout(1)
-            print 'Socket Created'
-        except socket.error:
-            print 'Failed to create socket'
-            s.close()
-            sys.exit()
-             
-        #Connect to remote server
-        try:
-            s.connect((Max_IP, int(Max_Port)))
-            print 'Socket Connected to Max on ip ' + Max_IP
-        except:
-            s.close()
-            Variables().writeVariable([['CubeOK', 0]])
-            print "Unable to make connection Trying later"
-            return
-         
-        try:
-            while 1:
-                reply = s.recv(1024)
-                #print reply
-                message += reply
-        except:
-            print "Message ended"
-            
-        if message != "":
-            Variables().writeVariable([['CubeOK', 1]])
-            validData = True
-            
-        s.close()
-        return (message, validData) 
-    
-    def parseData(self, message):
-        print_on = int(Variables().readVariables(['PrintData']))
-        message = message.split('\r\n')
-        global validData
-    
-        for lines in message:
-            #print lines
-            try:
-                if lines[0] == 'H':
-                    self.maxCmd_H(lines)
-                elif lines[0] == 'M':
-                    self.maxCmd_M(lines, 0)
-                elif lines[0] == 'C':
-                    self.maxCmd_C(lines)
-                elif lines[0] == 'L':
-                    self.maxCmd_L(lines)
-                else:
-                    break
-            except:
-                pass
-    
-        if print_on:
-            for keys in maxDetails:
-                print keys, maxDetails[keys]
-            print "Rooms"
-            for keys in rooms:
-                print keys, rooms[keys]
-            print "devices"
-            for keys in devices:
-                print keys, devices[keys]
-            print "valves"
-            for keys in valves:
-                print keys, valves[keys]
-        validData = False
+
         
     def getCurrentOutsidetemp(self):
         """
