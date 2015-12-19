@@ -2,6 +2,7 @@ import time
 
 from database import DbUtils
 from variables import Variables
+
 DB = DbUtils()
 VAR = Variables()
 
@@ -14,6 +15,7 @@ class CreateUIPage():
     def updateWebUI(self):
         roomTemps = self.createRooms()
         self.saveUI(roomTemps)
+        self.saveAdminUI()
         
     def saveUI(self, roomTemps):
         #print 'SAVE UI'
@@ -342,7 +344,7 @@ class CreateUIPage():
                         <span class="caret"></span>
                     </a>
                     <ul class="dropdown-menu">
-                        """.format(baseFontSize - 1.2, roomText))
+                        """.format(baseFontSize - 1.2, roomText[0:12]))
             for i in range(1, 7):
                 pageText.append("""<li><a href="/graph?{0}?{1}">Graph {1} - Day(s)</a></li>
                         """.format(roomText,i))
@@ -398,35 +400,36 @@ class CreateUIPage():
     
     
     def buttonLayout(self):
+        buttonSize = 1.4
         try:
             heating_state     = DB.getBoiler()[2]
         except:
             heating_state = 0
         duty_cycle = DB.getCubes()[3]
 
-        boiler_state, cube_state, vera_state = VAR.readVariables(['BoilerEnabled', 'CubeOK', 'VeraOK'])
+        boiler_state, cube_state, vera_state, baseFontSize = VAR.readVariables(['BoilerEnabled', 'CubeOK', 'VeraOK', 'BaseFontSize'])
         heating_cycle = self.dutyCycle()
 
         
         if boiler_state:
-            boilerIsOn = 'btn-success btn-lg" onClick="refreshPage();" name="boilerswitch" value="Boiler Enabled">'
+            boilerIsOn = 'btn-success btn-md" onClick="refreshPage();" name="boilerswitch" value="Boiler Enabled" style="font-size: {}vw;">'.format(baseFontSize - buttonSize)
         else:
-            boilerIsOn = 'btn-info btn-lg" onClick="refreshPage();" name="boilerswitch" value="Boiler Disabled">'
+            boilerIsOn = 'btn-info btn-md" onClick="refreshPage();" name="boilerswitch" value="Boiler Disabled" style="font-size: {}vw;">'.format(baseFontSize - buttonSize)
             
         if heating_state:
-            heatIsOn = 'btn-danger btn-lg">Heating is ON '
+            heatIsOn = 'btn-danger btn-md" style="font-size: {}vw;">Heating is ON '.format(baseFontSize - buttonSize)
         else:
-            heatIsOn = 'btn-info btn-lg">Heating is OFF '
+            heatIsOn = 'btn-info btn-md" style="font-size: {}vw;">Heating is OFF '.format(baseFontSize - buttonSize)
             
         if cube_state:
-            cubeIsOn = 'btn-success btn-lg">Cube '
+            cubeIsOn = 'btn-success btn-md" style="font-size: {}vw;">Cube '.format(baseFontSize - buttonSize)
         else:
-            cubeIsOn = 'btn-warning btn-lg">Cube '
+            cubeIsOn = 'btn-warning btn-md" style="font-size: {}vw;">Cube '.format(baseFontSize - buttonSize)
             
         if vera_state:
-            veraIsOn = 'btn-success btn-lg">Vera'
+            veraIsOn = 'btn-success btn-md" style="font-size: {}vw;">Vera'.format(baseFontSize - buttonSize)
         else:
-            veraIsOn = 'btn-warning btn-lg">Vera'
+            veraIsOn = 'btn-warning btn-md" style="font-size: {}vw;">Vera'.format(baseFontSize - buttonSize)
             
         html_text = """
     <div class="container-fluid bg-2 text-center">
@@ -435,14 +438,14 @@ class CreateUIPage():
         <form action="." method="GET" target="sneaky">
         <input type="hidden" name="confirm" value="1" />
         <div class="btn-group">
-            <input type="submit" class="btn {}
-            <a href="/heatcheck" class="btn {}<span class="badge">{}%</span></a>
-            <button type="button" class="btn {}<span class="badge">{}</span></button>
-            <button type="button" class="btn {}</button>
+            <input type="submit" class="btn {0}
+            <a href="/heatcheck" class="btn {1}<span class="badge" style="font-size: {6}vw;">{2}%</span></a>
+            <button type="button" class="btn {3}<span class="badge" style="font-size: {6}vw;">{4}</span></button>
+            <button type="button" class="btn {5}</button>
         </form>
         </div>
     </div>
-          """.format(boilerIsOn,heatIsOn,heating_cycle,cubeIsOn,duty_cycle,veraIsOn)
+          """.format(boilerIsOn,heatIsOn,heating_cycle,cubeIsOn,duty_cycle,veraIsOn,baseFontSize - 1.8)
         return html_text
     
     def adminButton(self):

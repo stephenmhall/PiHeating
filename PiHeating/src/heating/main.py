@@ -9,15 +9,18 @@ test change
 '''
 from __future__ import division
 
-__updated__ = "2015-12-13"
+__updated__ = "2015-12-19"
 
 import threading
 from SocketServer import ThreadingMixIn
 from BaseHTTPServer import HTTPServer
 from requesthandler import MyRequestHandler
+from heatinggpio import MyGpio
 from database import DbUtils
 from variables import Variables
 from max import Max
+from sys import platform as _platform
+
 
 
 class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
@@ -40,7 +43,12 @@ class Main():
         Max().checkHeat()
         if boiler_enabled != 1:
             checkInterval = checkInterval * 2
-        threading.Timer(checkInterval, self.doLoop).start()
+        if _platform == "linux" or _platform == "linux2":
+            MyGpio().heartbeat(checkInterval)
+            #print 'loop interval : ',checkInterval
+            self.doLoop()
+        else:
+            threading.Timer(checkInterval, self.doLoop).start()
     
     def startKioskServer(self):        
         webIP, webPort = Variables().readVariables(['WebIP', 'WebPort'])

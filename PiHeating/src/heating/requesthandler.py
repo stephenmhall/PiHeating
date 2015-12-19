@@ -23,7 +23,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         roomTemps = CUI.createRooms()
-        print 'GET ',self.path
+        #print 'GET ',self.path
         if self.path=="/":
             self.path="/index.html"
             self.updateUIPages(roomTemps)
@@ -46,15 +46,15 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             self.path="/graph.html"
             
         elif self.path =="/?confirm=1&boilerswitch=Boiler+Enabled":
-            #DB.updateBoilerState(0)
             VAR.writeVariable([['BoilerEnabled', 0]])
-            #self.path = "/index.html"
+            self.path = "/index.html"
+            time.sleep(1)
             self.updateUIPages(roomTemps)
             
         elif self.path == '/?confirm=1&boilerswitch=Boiler+Disabled':
-            #DB.updateBoilerState(1)
             VAR.writeVariable([['BoilerEnabled', 1]])
-            #self.path = "/index.html"
+            self.path = "/index.html"
+            time.sleep(1)
             self.updateUIPages(roomTemps)
             
         elif self.path =="/admin":
@@ -136,7 +136,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
         
     def do_POST(self):
         roomTemps = CUI.createRooms()
-        print 'POST ', self.path
+        #print 'POST ', self.path
         if self.path == "/admin":
             self.path = "/admin.html"
             form = cgi.FieldStorage(

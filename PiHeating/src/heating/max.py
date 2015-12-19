@@ -1,6 +1,7 @@
 from database import DbUtils
 from variables import Variables
 from webui import CreateUIPage
+from heatinggpio import MyGpio
 import base64
 import socket
 import datetime
@@ -51,6 +52,7 @@ class Max():
         except:
             s.close()
             Variables().writeVariable([['CubeOK', 0]])
+            MyGpio().cubeState(0)
             print "Unable to make connection Trying later"
             CreateUIPage().updateWebUI()
             return (message, validData)
@@ -65,6 +67,7 @@ class Max():
             
         if message != "":
             Variables().writeVariable([['CubeOK', 1]])
+            MyGpio().cubeState(1)
             validData = True
             
         s.close()
@@ -258,14 +261,15 @@ class Max():
         logTime = time.time()
         boilerEnabled, veraControl, Vera_Address, Vera_Port, \
         Vera_Device, singleRadThreshold, multiRadThreshold, \
-        multiRadCount = Variables().readVariables(['BoilerEnabled', 
+        multiRadCount, AllValveTotal = Variables().readVariables(['BoilerEnabled', 
                                            'VeraControl', 
                                            'VeraIP', 
                                            'VeraPort', 
                                            'VeraDevice',
                                            'SingleRadThreshold',
                                            'MultiRadThreshold',
-                                           'MultiRadCount'])
+                                           'MultiRadCount',
+                                           'AllValveTotal'])
         
         roomTemps = CreateUIPage().createRooms()
         outsideTemp = self.getCurrentOutsidetemp()
@@ -279,9 +283,10 @@ class Max():
             valveList.append(room[4])
 
         singleRadOn = sum(i >= singleRadThreshold for i in valveList)
-        multiradOn  = sum(i >= multiRadThreshold for i in valveList)
+        multiRadOn  = sum(i >= multiRadThreshold for i in valveList)
+        totalRadOn  = sum(valveList)
         
-        if singleRadOn >= 1 or multiradOn >= multiRadCount:
+        if singleRadOn >= 1 or multiRadOn >= multiRadCount or totalRadOn >= AllValveTotal:
             boilerState = 1
         else:
             boilerState = 0
@@ -296,9 +301,11 @@ class Max():
                 _ = requests.get(veraControl.format(Vera_Address, Vera_Port, 
                                                     Vera_Device, str(boilerState)), timeout=5)
                 Variables().writeVariable([['VeraOK', 1]])
+                MyGpio().veraState(1)
                 print 'message sent to Vera'
             except:
                 Variables().writeVariable([['VeraOK', 0]])
+                MyGpio().veraState(0)
                 print "vera is unreachable"
         else:
             boilerState = 0
@@ -306,9 +313,11 @@ class Max():
                 _ = requests.get(veraControl.format(Vera_Address, Vera_Port, 
                                                     Vera_Device, boilerState), timeout=5)
                 Variables().writeVariable([['VeraOK', 1]])
+                MyGpio().veraState(1)
                 print "Boiler is Disabled"
             except:
                 Variables().writeVariable([['VeraOK', 0]])
+                MyGpio().veraState(0)
                 print "vera is unreachable"
         try:
             boilerOn = DbUtils().getBoiler()[2]
@@ -320,7 +329,8 @@ class Max():
             #print 'switch heat DbUtils() message ', msg
             DbUtils().updateBoiler(msg)
         boilerOn = boilerState
-        
+        MyGpio().boilerState(boilerEnabled)
+        MyGpio().heatingState(boilerState)
         # Create UI Pages
         CreateUIPage().saveUI(roomTemps)
         CreateUIPage().saveAdminUI()
