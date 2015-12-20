@@ -31,9 +31,6 @@ class MyGpio(object):
             GPIO.setup(27,GPIO.OUT) # Heart beat
             GPIO.setup(05,GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  # Disable Heat Button
             
-            #GPIO.add_event_listener(05, GPIO.FALLING)
-            #GPIO.add_callback(05, self.buttonDisableBoiler, )
-            
             GPIO.add_event_detect(05,GPIO.RISING, callback=self.buttonDisableBoiler, bouncetime=500)
         
 
@@ -48,7 +45,7 @@ class MyGpio(object):
         
         Variables().writeVariable([['BoilerEnabled', boilerState]])
         self.boilerState(boilerState)
-        time.sleep(1)
+        time.sleep(1) # stops event repeating
         GPIO.add_event_detect(05,GPIO.RISING, callback=self.buttonDisableBoiler, bouncetime=500)
         
     
