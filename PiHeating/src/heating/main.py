@@ -9,7 +9,7 @@ test change
 '''
 from __future__ import division
 
-__updated__ = "2015-12-19"
+__updated__ = "2015-12-22"
 
 import threading
 from SocketServer import ThreadingMixIn
@@ -36,7 +36,9 @@ class Main():
             DbUtils().initialiseDB()
 
         self.startKioskServer()
-        self.doLoop()        
+        self.doLoop()
+        
+               
             
     def doLoop(self):
         checkInterval, boiler_enabled = Variables().readVariables(['Interval', 'BoilerEnabled'])

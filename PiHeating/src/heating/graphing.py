@@ -34,6 +34,7 @@ class MakeGraph():
         f = open('graph.html', 'w')
         f.write(html_text)
         f.close()
+        
 
 
     def html_Top(self):

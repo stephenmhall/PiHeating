@@ -41,20 +41,71 @@ class CreateUIPage():
         pageText = []
         pageText.append(self.pageTop())
         pageText.append(self.pageHeader())
-        #pageText.append(self.roomTable(roomTemps))
         pageText.append(self.buttonLayout())
-        #pageText.append(self.weatherWidget())
         pageText.append(self.homeButton())
         pageText.append(self.variablesPage())
         pageText.append(self.shutdownButton())
         pageText.append(self.filler())
         pageText.append(self.page_bottom())
-        
         html_text = ''.join(pageText)
 
         indexFile = open('admin.html', 'w')
         indexFile.write(html_text)
         indexFile.close()
+        
+    def rangeGraphUI(self):
+        print 'Creating rangeGraph page'
+        pageText = []
+        pageText.append(self.pageTop())
+        pageText.append(self.pageHeader())
+        pageText.append(self.rangeGraphpage())
+        pageText.append(self.buttonLayout())
+        pageText.append(self.weatherWidget())
+        pageText.append(self.homeButton())
+        pageText.append(self.filler())
+        pageText.append(self.page_bottom())
+        html_text = ''.join(pageText)
+        
+        indexFile = open('rangegraph.html', 'w')
+        indexFile.write(html_text)
+        indexFile.close()
+        
+    def rangeGraphpage(self):
+        baseFontSize = float(VAR.readVariables(['BaseFontSize']))
+        rooms = DB.getRooms()
+        print rooms
+        pageText = []
+        pageText.append("""
+            <div class="container-fluid bg-3">
+                <div class="well well-sm">
+                    <div class="btn-group">
+                        <a class="btn dropdown-toggle btn-select" data-toggle="dropdown" href="#">Select a Room <span class="caret"></span></a>
+                        <ul class="dropdown-menu">
+                        """)
+        # Add room dropdown
+        for room in rooms:
+            roomText = room[1]
+            pageText.append("""<li><a href="#">{}</a></li>
+            """.format(roomText))
+
+        pageText.append("""
+        </ul>
+    </div>""")
+                        
+        pageText.append("""
+        <div id="datetimepicker" class="input-append date">
+      <input type="text"></input>
+      <span class="add-on">
+        <i data-time-icon="icon-time" data-date-icon="icon-calendar"></i>
+      </span>
+    </div>""")
+        pageText.append("""
+                </div>
+            </div>    
+            """)
+        html_text = ''.join(pageText)
+        return html_text
+        
         
     def OnUpdateTime(self):
         self.nowTime = time.strftime("%b %d %Y %H:%M:%S", time.localtime(time.time()))
@@ -156,6 +207,10 @@ class CreateUIPage():
             <link href="dist/css/bootstrap3/bootstrap-switch.css" rel="stylesheet">
             <link href="http://getbootstrap.com/assets/css/docs.min.css" rel="stylesheet">
             <link href="docs/css/main.css" rel="stylesheet">
+            
+            <link rel="stylesheet" type="text/css" media="screen"
+            href="http://tarruda.github.com/bootstrap-datetimepicker/assets/css/bootstrap-datetimepicker.min.css">
+             
             <script>
               var _gaq = _gaq || [];
               _gaq.push(['_setAccount', 'UA-43092768-1']);
@@ -191,6 +246,15 @@ class CreateUIPage():
                   $(document).ready(function(){
                     $('.dropdown-toggle').dropdown()
                     
+                });
+                
+                $(".dropdown-menu li a").click(function(){
+                  var selText = $(this).text();
+                  $(this).parents('.btn-group').find('.dropdown-toggle').html(selText+' <span class="caret"></span>');
+                });
+                
+                $("#btnSearch").click(function(){
+                    alert($('.btn-select').text()+", "+$('.btn-select2').text());
                 });
                 
 
@@ -283,10 +347,6 @@ class CreateUIPage():
     
     
     def pageHeader(self):
-        #variables = DB.getVariables()
-        
-        #page_refresh = variables[6]
-        #boiler_enabled = variables[5]
         
         heat_Interval, boiler_enabled = VAR.readVariables(['Interval', 'BoilerEnabled'])
         
@@ -308,15 +368,15 @@ class CreateUIPage():
             <div class="well well-sm">
             <div class="btn-group btn-group-justified">
                 <a href="#" class="btn btn-default btn-lg" style="font-size: {0}vw;"><B>HOUSE MODE</B></a>
-                <a href="#" class="btn btn-default btn-lg" style="font-size: {0}vw;"><span class="glyphicon glyphicon-time"></span><B> AUTO</B></a>
-                <a href="#" class="btn btn-default btn-lg" style="font-size: {0}vw;"><span class="glyphicon glyphicon-leaf"></span><B> ECO</B></a>
+                <a href="/automode?auto?00?0" class="btn btn-default btn-lg" style="font-size: {0}vw;"><span class="glyphicon glyphicon-time"></span><B> AUTO</B></a>
+                <a href="/ecomode?eco?0?0" class="btn btn-default btn-lg" style="font-size: {0}vw;"><span class="glyphicon glyphicon-leaf"></span><B> ECO</B></a>
                 <a href="#" class="btn btn-default btn-lg" style="font-size: {0}vw;"><span class="glyphicon glyphicon-asterisk"></span><B> COMFORT</B></a>
                 <a href="#" class="btn btn-default btn-lg" style="font-size: {0}vw;"><span class="glyphicon glyphicon-pencil"></span><B> CUSTOM</B></a>
             </div>
             </div>
             <div class="well well-sm">
             <div class="btn-group btn-group-justified">
-                <a href="#" class="btn btn-default btn-lg" style="font-size: {0}vw;"><B>ROOM</B></a>
+                <a href="/rangegraph.html" class="btn btn-default btn-lg" style="font-size: {0}vw;"><B>ROOM</B></a>
                 <a href="#" class="btn btn-default btn-lg" style="font-size: {0}vw;"><B>MODE</B></a>
                 <a href="#" class="btn btn-default btn-lg" style="font-size: {0}vw;"><B>SET TEMP &#8451</B></a>
                 <a href="#" class="btn btn-default btn-lg" style="font-size: {0}vw;"><B>TEMP &#8451</B></a>
@@ -329,7 +389,7 @@ class CreateUIPage():
             truTemp  = rooms[3]
             valvePos = rooms[4]
             roomMode = rooms[5]
-            roomModes = ['AUTO', 'MANUAL', 'BOOST', 'VACATION']
+            roomModes = ['AUTO', 'MANUAL', 'ECO', 'BOOST', 'VACATION']
             if valvePos > 35:      # how far valve is open
                 cold_text = 'btn-info'
             else:
@@ -578,6 +638,20 @@ class CreateUIPage():
         <script src="docs/js/highlight.js"></script>
         <script src="dist/js/bootstrap-switch.js"></script>
         <script src="docs/js/main.js"></script>
+        
+        <script type="text/javascript"
+         src="http://tarruda.github.com/bootstrap-datetimepicker/assets/js/bootstrap-datetimepicker.min.js">
+        </script>
+        <script type="text/javascript"
+         src="http://tarruda.github.com/bootstrap-datetimepicker/assets/js/bootstrap-datetimepicker.pt-BR.js">
+        </script>
+        <script type="text/javascript">
+          $('#datetimepicker').datetimepicker({
+            format: 'dd/MM/yyyy hh:mm:ss',
+            language: 'pt-BR'
+          });
+        </script>
+        
     </body>
 </html>"""
         return html_text

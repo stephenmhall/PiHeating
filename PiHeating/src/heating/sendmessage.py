@@ -8,6 +8,7 @@ Created on 6 Dec 2015
 import binascii
 import socket
 import sys
+import time
 #import base64
 from variables import Variables
 from database import DbUtils
@@ -26,6 +27,7 @@ class SendMessage(object):
         Constructor
         '''
         self.baseString = "000440000000"
+        
         
     def s_Command(self, rfAddress, roomID, thermostatMode, setpointTemperature):
         """
@@ -50,27 +52,36 @@ class SendMessage(object):
         """
         self.rfAddress = rfAddress
         self.roomID = format(int(roomID), '02x')
+        #bits = ''
         #print 'room ID : ', self.roomID
+        
         self.setpointTemperature = int(float(setpointTemperature) * 2)
         bits = '{0:06b}'.format(self.setpointTemperature)
-        #print 'setpoint temp in bits : ', bits
+        print 'setpoint temp in bits : ', bits
         
-        if thermostatMode == 'MANUAL':
-            bits = '01' + bits
-        elif thermostatMode == 'BOOST':
-            bits = '11' + bits
-        elif thermostatMode == 'VACATION':
-            bits = '10' + bits
-        else:
-            bits = '00' + bits
+        if thermostatMode != 'none':
+            if thermostatMode == 'MANUAL':
+                bits = '01' + bits
+            elif thermostatMode == 'BOOST':
+                bits = '11' + bits
+            elif thermostatMode == 'VACATION':
+                bits = '10' + bits
+            else:
+                bits = '00' + bits
         
-        #print 'bits with mode added : ', bits
-            
+        print 'bits with mode added : ', bits
         bits = hex(int(bits, 2))[2:]
-        #print 'temp bits as Hex : ', bits
+        print 'temp bits as Hex : ', bits
+        if bits == '0':
+            bits = '00'
             
-        commandString = self.baseString + self.rfAddress + self.roomID + bits
-        #print 'command string : ', commandString
+        if thermostatMode == 'none':
+            commandString = self.baseString + self.rfAddress + self.roomID
+        else:
+            commandString = self.baseString + self.rfAddress + self.roomID + bits
+            
+        
+        print 'command string : ', commandString
         commandString = self.hextoBase64(commandString)
         #print 'encoded string : ', commandString
         return commandString
@@ -141,19 +152,45 @@ class SendMessage(object):
     def updateRoom(self, roomData):
         roomList = DbUtils().getRooms()
         #print roomList
+        print roomData
         roomSplit = roomData.split('?')
         mode = roomSplit[1].replace('%20', ' ')
         room = roomSplit[2].replace('%20', ' ')
         temp = roomSplit[3].replace('%20', ' ')
         #print room, mode, temp
         
-        for rooms in roomList:
-            if room == rooms[1]:
-                #print room
-                #print rooms[2], rooms[0], mode, temp
-                sCommand = self.s_Command(rooms[2], rooms[0], mode, temp)# rf address,room Number, mode, temp
-                #print 'Sending command : ', sCommand
+        if mode == 'eco':
+            for rooms in roomList:
+                sCommand = self.s_Command(rooms[2], rooms[0], 'none', 0.0)
+                #print sCommand
                 self.sendMAX(sCommand)
+                time.sleep(0.8)
+                
+        if mode == 'ECO':
+            for rooms in roomList:
+                if room == rooms[1]:
+                    #print room
+                    #print rooms[2], rooms[0], mode, temp
+                    sCommand = self.s_Command(rooms[2], rooms[0], 'none', 0.0)
+                    #print 'Sending command : ', sCommand
+                    self.sendMAX(sCommand)
+                
+        elif mode == 'auto':
+            for rooms in roomList:
+                sCommand = self.s_Command(rooms[2], rooms[0], 'AUTO', 0.0)
+                #print sCommand
+                self.sendMAX(sCommand)
+                time.sleep(0.8)
+        
+        else:
+            # For standard room change
+            for rooms in roomList:
+                if room == rooms[1]:
+                    #print room
+                    #print rooms[2], rooms[0], mode, temp
+                    sCommand = self.s_Command(rooms[2], rooms[0], mode, temp)# rf address,room Number, mode, temp
+                    #print 'Sending command : ', sCommand
+                    self.sendMAX(sCommand)
                 
         CreateUIPage().updateWebUI()
                 

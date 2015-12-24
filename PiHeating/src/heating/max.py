@@ -329,8 +329,11 @@ class Max():
             #print 'switch heat DbUtils() message ', msg
             DbUtils().updateBoiler(msg)
         boilerOn = boilerState
-        MyGpio().boilerState(boilerEnabled)
-        MyGpio().heatingState(boilerState)
+        try:
+            MyGpio().boilerState(boilerEnabled)
+            MyGpio().heatingState(boilerState)
+        except:
+            print 'Unable to set GPIO outputs'
         # Create UI Pages
         CreateUIPage().saveUI(roomTemps)
         CreateUIPage().saveAdminUI()

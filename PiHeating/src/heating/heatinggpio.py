@@ -18,7 +18,12 @@ class MyGpio(object):
         Constructor
         '''
         if _platform == "linux" or _platform == "linux2":
-            GPIO.cleanup()
+            try:
+                GPIO.cleanup()
+                
+            except:
+                print 'Unable to clean GPIO'
+                
             GPIO.setmode(GPIO.BCM)
             GPIO.setwarnings(False)
             GPIO.setup(04,GPIO.OUT) # Boiler Disabled
@@ -29,9 +34,16 @@ class MyGpio(object):
             GPIO.setup(24,GPIO.OUT) # Vera Ok
             GPIO.setup(25,GPIO.OUT) # Vera Error
             GPIO.setup(27,GPIO.OUT) # Heart beat
-            GPIO.setup(05,GPIO.IN, pull_up_down=GPIO.PUD_DOWN)  # Disable Heat Button
-            
-            GPIO.add_event_detect(05,GPIO.RISING, callback=self.buttonDisableBoiler, bouncetime=500)
+#             GPIO.setup(05,GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Disable Heat Button
+#             GPIO.setup(06,GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Switch Heat
+#             GPIO.setup(12,GPIO.IN, pull_up_down=GPIO.PUD_UP)  # 
+#             GPIO.setup(13,GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Reboot Raspberry Pi
+#             
+#             
+#             GPIO.add_event_detect(05,GPIO.FALLING, callback=self.buttonDisableBoiler, bouncetime=500)
+#             GPIO.add_event_detect(06,GPIO.FALLING, callback=self.buttonSwitchHeat, bouncetime=500)
+#             GPIO.add_event_detect(12,GPIO.FALLING, callback=self.buttonFour, bouncetime=500)
+#             GPIO.add_event_detect(13,GPIO.FALLING, callback=self.buttonReboot, bouncetime=500)
         
 
     def buttonDisableBoiler(self, event):
@@ -46,8 +58,25 @@ class MyGpio(object):
         Variables().writeVariable([['BoilerEnabled', boilerState]])
         self.boilerState(boilerState)
         time.sleep(1) # stops event repeating
-        GPIO.add_event_detect(05,GPIO.RISING, callback=self.buttonDisableBoiler, bouncetime=500)
+        GPIO.add_event_detect(05,GPIO.FALLING, callback=self.buttonDisableBoiler, bouncetime=500)
         
+    def buttonSwitchHeat(self, event):
+        GPIO.remove_event_detect(event)
+        print 'button Switch Heat'
+        time.sleep(1)
+        GPIO.add_event_detect(06,GPIO.FALLING, callback=self.buttonSwitchHeat, bouncetime=500)
+    
+    def buttonReboot(self, event):
+        GPIO.remove_event_detect(event)
+        print 'button Reboot'
+        time.sleep(1)
+        GPIO.add_event_detect(13,GPIO.FALLING, callback=self.buttonReboot, bouncetime=500)
+    
+    def buttonFour(self, event):
+        GPIO.remove_event_detect(event)
+        print 'button Four'
+        time.sleep(1)
+        GPIO.add_event_detect(12,GPIO.FALLING, callback=self.buttonFour, bouncetime=500)
     
     def heartbeat(self, beatTime):
         if _platform == "linux" or _platform == "linux2":
@@ -81,36 +110,45 @@ class MyGpio(object):
             
             
     def boilerState(self, state):
-        if _platform == "linux" or _platform == "linux2":
-            if state == 1:
-                print 'GPIO boiler on'
-                GPIO.output(04,GPIO.LOW)
-            elif state == 0:
-                print 'GPIO boiler off'
-                GPIO.output(04,GPIO.HIGH)
-                
-        elif _platform == "win32":
-            if state == 1:
-                print 'heating on'
-            elif state == 0:
-                print 'heating off'
+        try:
+            if _platform == "linux" or _platform == "linux2":
+                if state == 1:
+                    print 'GPIO boiler on'
+                    GPIO.output(04,GPIO.LOW)
+                elif state == 0:
+                    print 'GPIO boiler off'
+                    GPIO.output(04,GPIO.HIGH)
+                    
+            elif _platform == "win32":
+                if state == 1:
+                    print 'heating on'
+                elif state == 0:
+                    print 'heating off'
+                    
+        except:
+            print 'Unable to set GPIO Boiler state'
                 
     def heatingState(self, state):
-        if _platform == "linux" or _platform == "linux2":
-            if state == 1:
-                print 'GPIO heating on'
-                GPIO.output(17,GPIO.HIGH)
-                GPIO.output(18,GPIO.LOW)
-            elif state == 0:
-                print 'GPIO heating off'
-                GPIO.output(17,GPIO.LOW)
-                GPIO.output(18,GPIO.HIGH)
-                
-        elif _platform == "win32":
-            if state == 1:
-                print 'heating on'
-            elif state == 0:
-                print 'heating off'
+        try:
+            
+            if _platform == "linux" or _platform == "linux2":
+                if state == 1:
+                    print 'GPIO heating on'
+                    GPIO.output(17,GPIO.HIGH)
+                    GPIO.output(18,GPIO.LOW)
+                elif state == 0:
+                    print 'GPIO heating off'
+                    GPIO.output(17,GPIO.LOW)
+                    GPIO.output(18,GPIO.HIGH)
+                    
+            elif _platform == "win32":
+                if state == 1:
+                    print 'heating on'
+                elif state == 0:
+                    print 'heating off'
+                    
+        except:
+            print 'Unable to set GPIO Heating State'
                 
     def cubeState(self, state):
         if _platform == "linux" or _platform == "linux2":

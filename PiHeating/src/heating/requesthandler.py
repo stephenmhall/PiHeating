@@ -22,11 +22,32 @@ GRAPH = MakeGraph()
 class MyRequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
-        roomTemps = CUI.createRooms()
+        #roomTemps = CUI.createRooms()
         #print 'GET ',self.path
         if self.path=="/":
+            roomTemps = CUI.createRooms()
             self.path="/index.html"
             self.updateUIPages(roomTemps)
+            
+        elif self.path[0:8] == '/ecomode':
+            roomData = self.path
+            #print 'ecomode data : ', roomData
+            SendMessage().updateRoom(roomData)
+            self.path="/index.html"
+            time.sleep(1)
+            Max().checkHeat()
+            
+        elif self.path[0:9] == '/automode':
+            roomData = self.path
+            SendMessage().updateRoom(roomData)
+            self.path="/index.html"
+            time.sleep(1)
+            Max().checkHeat()
+            
+        elif self.path[0:11] == '/rangegraph':
+            print 'going to create rangeGraph page'
+            CUI.rangeGraphUI()
+            time.sleep(1)
             
         elif self.path[0:10] == '/heatcheck':
             roomData = self.path
@@ -46,18 +67,21 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             self.path="/graph.html"
             
         elif self.path =="/?confirm=1&boilerswitch=Boiler+Enabled":
+            roomTemps = CUI.createRooms()
             VAR.writeVariable([['BoilerEnabled', 0]])
             self.path = "/index.html"
             time.sleep(1)
             self.updateUIPages(roomTemps)
             
         elif self.path == '/?confirm=1&boilerswitch=Boiler+Disabled':
+            roomTemps = CUI.createRooms()
             VAR.writeVariable([['BoilerEnabled', 1]])
             self.path = "/index.html"
             time.sleep(1)
             self.updateUIPages(roomTemps)
             
         elif self.path =="/admin":
+            roomTemps = CUI.createRooms()
             self.path = "/admin.html"
             self.updateUIPages(roomTemps)
             
