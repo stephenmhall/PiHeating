@@ -4,6 +4,7 @@ if _platform == "linux" or _platform == "linux2":
     
 from threading import Thread
 from variables import Variables
+from database import DbUtils
 
 import time
 
@@ -18,11 +19,11 @@ class MyGpio(object):
         Constructor
         '''
         if _platform == "linux" or _platform == "linux2":
-            try:
-                GPIO.cleanup()
-                
-            except:
-                print 'Unable to clean GPIO'
+#             try:
+#                 GPIO.cleanup()
+#                 
+#             except:
+#                 print 'Unable to clean GPIO'
                 
             GPIO.setmode(GPIO.BCM)
             GPIO.setwarnings(False)
@@ -79,20 +80,65 @@ class MyGpio(object):
         GPIO.add_event_detect(12,GPIO.FALLING, callback=self.buttonFour, bouncetime=500)
     
     def heartbeat(self, beatTime):
+        cube_state, vera_state, boiler_enabled = Variables().readVariables(['CubeOK', 'VeraOK', 'BoilerEnabled'])
+        heating_state = DbUtils().getBoiler()[2]
         if _platform == "linux" or _platform == "linux2":
             print 'GPIO for :', beatTime
-            thread = Thread(name = 'heartbeat', target = self.beatFunction(beatTime))
+            thread = Thread(name = 'heartbeat', target = self.beatFunction(beatTime, 
+                                                                           cube_state, 
+                                                                           vera_state, 
+                                                                           heating_state, 
+                                                                           boiler_enabled))
             thread.setDaemon(True)
             thread.start()
             #thread.join()
         elif _platform == "win32":
             print 'heartbeat for :', beatTime
             
-    def beatFunction(self, arg):
+    def beatFunction(self, beat_time, cube_state, vera_state, heating_state, boiler_enabled):
+        print 'heating state: ', heating_state
+        # Set Cube Lights
+        if cube_state:
+            print 'GPIO cube ok'
+            GPIO.output(22,GPIO.HIGH)
+            GPIO.output(23,GPIO.LOW)
+        else:
+            print 'GPIO cube error'
+            GPIO.output(22,GPIO.LOW)
+            GPIO.output(23,GPIO.HIGH)
+            
+        # Set Vera Lights
+        if vera_state:
+            print 'GPIO vera ok'
+            GPIO.output(24,GPIO.HIGH)
+            GPIO.output(25,GPIO.LOW)
+        else:
+            GPIO.output(24,GPIO.LOW)
+            GPIO.output(25,GPIO.HIGH)
+            print 'GPIO vera error'
+            
+        # Set Heating State
+        if heating_state:
+            print 'GPIO heating on'
+            GPIO.output(17,GPIO.HIGH)
+            GPIO.output(18,GPIO.LOW)
+        else:
+            print 'GPIO heating off'
+            GPIO.output(17,GPIO.LOW)
+            GPIO.output(18,GPIO.HIGH)
+            
+        # Set Boiler State
+        if boiler_enabled:
+            print 'GPIO boiler on'
+            GPIO.output(04,GPIO.LOW)
+        else:
+            print 'GPIO boiler off'
+            GPIO.output(04,GPIO.HIGH)
+
         heart = GPIO.PWM(27, 100)
         pause_time = 0.02
         startTime = time.time()
-        endTime = startTime + arg
+        endTime = startTime + beat_time
         heart.start(0)
         while startTime < endTime:
             for i in range(0,101):      # 101 because it stops when it finishes 100  
@@ -105,6 +151,14 @@ class MyGpio(object):
         
         print 'stopping thread'
         heart.stop()
+        GPIO.output(04,GPIO.LOW)
+        GPIO.output(17,GPIO.LOW)
+        GPIO.output(18,GPIO.LOW)
+        GPIO.output(22,GPIO.LOW)
+        GPIO.output(23,GPIO.LOW)
+        GPIO.output(24,GPIO.LOW)
+        GPIO.output(25,GPIO.LOW)
+        GPIO.output(27,GPIO.LOW)
         #GPIO.cleanup()
         #return
             

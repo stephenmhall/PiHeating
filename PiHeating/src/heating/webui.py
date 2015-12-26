@@ -390,7 +390,7 @@ class CreateUIPage():
             valvePos = rooms[4]
             roomMode = rooms[5]
             roomModes = ['AUTO', 'MANUAL', 'ECO', 'BOOST', 'VACATION']
-            if valvePos > 35:      # how far valve is open
+            if valvePos > 60:      # how far valve is open
                 cold_text = 'btn-info'
             else:
                 cold_text = 'btn-warning'
@@ -472,9 +472,9 @@ class CreateUIPage():
 
         
         if boiler_state:
-            boilerIsOn = 'btn-success btn-md" onClick="refreshPage();" name="boilerswitch" value="Boiler Enabled" style="font-size: {}vw;">'.format(baseFontSize - buttonSize)
+            boilerIsOn = 'btn-success btn-md" name="boilerswitch" value="Boiler Enabled" style="font-size: {}vw;">'.format(baseFontSize - buttonSize)
         else:
-            boilerIsOn = 'btn-info btn-md" onClick="refreshPage();" name="boilerswitch" value="Boiler Disabled" style="font-size: {}vw;">'.format(baseFontSize - buttonSize)
+            boilerIsOn = 'btn-info btn-md" name="boilerswitch" value="Boiler Disabled" style="font-size: {}vw;">'.format(baseFontSize - buttonSize)
             
         if heating_state:
             heatIsOn = 'btn-danger btn-md" style="font-size: {}vw;">Heating is ON '.format(baseFontSize - buttonSize)

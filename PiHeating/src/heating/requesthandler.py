@@ -50,7 +50,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             time.sleep(1)
             
         elif self.path[0:10] == '/heatcheck':
-            roomData = self.path
+            #roomData = self.path
             Max().checkHeat()
             self.path="/index.html"
             
@@ -72,6 +72,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             self.path = "/index.html"
             time.sleep(1)
             self.updateUIPages(roomTemps)
+            Max().checkHeat()
             
         elif self.path == '/?confirm=1&boilerswitch=Boiler+Disabled':
             roomTemps = CUI.createRooms()
@@ -79,6 +80,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             self.path = "/index.html"
             time.sleep(1)
             self.updateUIPages(roomTemps)
+            Max().checkHeat()
             
         elif self.path =="/admin":
             roomTemps = CUI.createRooms()
