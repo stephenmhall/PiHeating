@@ -89,9 +89,9 @@ class MyGpio(object):
                                                                            vera_state, 
                                                                            heating_state, 
                                                                            boiler_enabled))
-            thread.setDaemon(True)
+            #thread.setDaemon(True)
             thread.start()
-            #thread.join()
+            thread.join()
         elif _platform == "win32":
             print 'heartbeat for :', beatTime
             
@@ -160,78 +160,5 @@ class MyGpio(object):
         GPIO.output(25,GPIO.LOW)
         GPIO.output(27,GPIO.LOW)
         #GPIO.cleanup()
-        #return
+        return
             
-            
-    def boilerState(self, state):
-        try:
-            if _platform == "linux" or _platform == "linux2":
-                if state == 1:
-                    print 'GPIO boiler on'
-                    GPIO.output(04,GPIO.LOW)
-                elif state == 0:
-                    print 'GPIO boiler off'
-                    GPIO.output(04,GPIO.HIGH)
-                    
-            elif _platform == "win32":
-                if state == 1:
-                    print 'heating on'
-                elif state == 0:
-                    print 'heating off'
-                    
-        except:
-            print 'Unable to set GPIO Boiler state'
-                
-    def heatingState(self, state):
-        try:
-            
-            if _platform == "linux" or _platform == "linux2":
-                if state == 1:
-                    print 'GPIO heating on'
-                    GPIO.output(17,GPIO.HIGH)
-                    GPIO.output(18,GPIO.LOW)
-                elif state == 0:
-                    print 'GPIO heating off'
-                    GPIO.output(17,GPIO.LOW)
-                    GPIO.output(18,GPIO.HIGH)
-                    
-            elif _platform == "win32":
-                if state == 1:
-                    print 'heating on'
-                elif state == 0:
-                    print 'heating off'
-                    
-        except:
-            print 'Unable to set GPIO Heating State'
-                
-    def cubeState(self, state):
-        if _platform == "linux" or _platform == "linux2":
-            if state == 1:
-                print 'GPIO cube ok'
-                GPIO.output(22,GPIO.HIGH)
-                GPIO.output(23,GPIO.LOW)
-            elif state == 0:
-                print 'GPIO cube error'
-                GPIO.output(22,GPIO.LOW)
-                GPIO.output(23,GPIO.HIGH)
-        elif _platform == "win32":
-            if state:
-                print 'cube ok'
-            else:
-                print 'cube error'
-            
-    def veraState(self, state):
-        if _platform == "linux" or _platform == "linux2":
-            if state == 1:
-                print 'GPIO vera ok'
-                GPIO.output(24,GPIO.HIGH)
-                GPIO.output(25,GPIO.LOW)
-            elif state == 0:
-                GPIO.output(24,GPIO.LOW)
-                GPIO.output(25,GPIO.HIGH)
-                print 'GPIO vera error'
-        elif _platform == "win32":       
-            if state:
-                print 'vera ok'
-            else:
-                print 'vera error'
