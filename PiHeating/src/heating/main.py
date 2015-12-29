@@ -9,7 +9,7 @@ test change
 '''
 from __future__ import division
 
-__updated__ = "2015-12-22"
+__updated__ = "2015-12-29"
 
 import threading
 from SocketServer import ThreadingMixIn
@@ -36,6 +36,7 @@ class Main():
             DbUtils().initialiseDB()
 
         self.startKioskServer()
+        MyGpio().setupGPIO()
         self.doLoop()
         
                

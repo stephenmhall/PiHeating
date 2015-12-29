@@ -11,6 +11,7 @@ from graphing import MakeGraph
 from variables import Variables
 from sendmessage import SendMessage
 from max import Max
+from heatinggpio import MyGpio
 #SM = SendMessage()
 VAR = Variables()
 CUI = CreateUIPage()
@@ -51,7 +52,8 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             
         elif self.path[0:10] == '/heatcheck':
             #roomData = self.path
-            Max().checkHeat()
+            #Max().checkHeat()
+            MyGpio().buttonCheckHeat(1)
             self.path="/index.html"
             
         elif self.path[0:5] == '/mode':
