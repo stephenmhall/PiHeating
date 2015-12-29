@@ -87,10 +87,10 @@ class MyGpio(object):
             GPIO.setup(13,GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Reboot Raspberry Pi
 #             
 #             
-            GPIO.add_event_detect(06,GPIO.FALLING, callback=self.buttonDisableBoiler, bouncetime=500)# 05
-            GPIO.add_event_detect(12,GPIO.FALLING, callback=self.buttonCheckHeat, bouncetime=500)    # 06
-            GPIO.add_event_detect(13,GPIO.FALLING, callback=self.buttonShutdown, bouncetime=500)     # 12
-            GPIO.add_event_detect(05,GPIO.FALLING, callback=self.buttonReboot, bouncetime=500)       # 13
+            GPIO.add_event_detect(05,GPIO.FALLING, callback=self.buttonDisableBoiler, bouncetime=500)# 05
+            GPIO.add_event_detect(06,GPIO.FALLING, callback=self.buttonCheckHeat, bouncetime=500)    # 06
+            GPIO.add_event_detect(12,GPIO.FALLING, callback=self.buttonShutdown, bouncetime=500)     # 12
+            GPIO.add_event_detect(13,GPIO.FALLING, callback=self.buttonReboot, bouncetime=500)       # 13
         
 
     def buttonDisableBoiler(self, channel):
@@ -144,16 +144,16 @@ class MyGpio(object):
                 buttonPressTimer += 1
                 if buttonPressTimer > 4:
                     print 'rebooting'
-                    ledFlash = GPIO.PWM(25, 30)
+                    ledFlash = GPIO.PWM(23, 30)
                     ledFlash.start(50)
                 elif buttonPressTimer == 2:
-                    ledFlash = GPIO.PWM(25, 5)
+                    ledFlash = GPIO.PWM(23, 5)
                     ledFlash.start(50)
                 elif buttonPressTimer == 3:
-                    ledFlash = GPIO.PWM(25, 10)
+                    ledFlash = GPIO.PWM(23, 10)
                     ledFlash.start(50)
                 elif buttonPressTimer < 3:
-                    ledFlash = GPIO.PWM(25, 2)
+                    ledFlash = GPIO.PWM(23, 2)
                     ledFlash.start(50)
             else:
                 if buttonPressTimer > 4:
@@ -178,16 +178,16 @@ class MyGpio(object):
                 buttonPressTimer += 1
                 if buttonPressTimer > 4:
                     print 'shutting down'
-                    ledFlash = GPIO.PWM(23, 30)
+                    ledFlash = GPIO.PWM(25, 30)
                     ledFlash.start(50)
                 elif buttonPressTimer == 2:
-                    ledFlash = GPIO.PWM(23, 5)
+                    ledFlash = GPIO.PWM(25, 5)
                     ledFlash.start(50)
                 elif buttonPressTimer == 3:
-                    ledFlash = GPIO.PWM(23, 10)
+                    ledFlash = GPIO.PWM(25, 10)
                     ledFlash.start(50)
                 elif buttonPressTimer < 3:
-                    ledFlash = GPIO.PWM(23, 2)
+                    ledFlash = GPIO.PWM(25, 2)
                     ledFlash.start(50)
             else:
                 if buttonPressTimer > 4:
