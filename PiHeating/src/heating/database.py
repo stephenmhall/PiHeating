@@ -1,15 +1,19 @@
 #!/usr/bin/env python
+import logging
 import sqlite3
 dataBase =  'heating.db'
+module_logger = logging.getLogger("main.database")
 
 class DbUtils():
     def __init__(self):
         """
         Database utilities
         """
+        self.logger = logging.getLogger("main.database.DbUtils")
 
     def initialiseDB(self):
-        print "initialising database"
+        #print "initialising database"
+        module_logger.info("Initialised database")
         
         conn = sqlite3.connect(dataBase)
         cursor = conn.cursor() #Cursor object to execute sql commands
@@ -74,93 +78,73 @@ class DbUtils():
             
             
     def updateCube(self, msg):
-        
         try:
             conn = sqlite3.connect(dataBase)
             cursor = conn.cursor()
             cursor.execute("INSERT or REPLACE into MaxCubes(ID,SerialNo,rfChannel,dutyCycle)\
                                  VALUES(?, ?, ?, ?)", msg)
-            #print "Committing Database"
             conn.commit()
             
         except Exception as e:
-            #print "Database Rollback"
             conn.rollback()
             raise e
         finally:
-            #print "Closing Database"
             conn.close()
             
     def updateRooms(self, msg):
-        
         try:
             conn = sqlite3.connect(dataBase)
             cursor = conn.cursor()
             cursor.executemany("INSERT or REPLACE into rooms(ID,Name,GroupID)\
                                  VALUES(?, ?, ?)", msg)
-            #print "Committing Database"
             conn.commit()
             
         except Exception as e:
-            #print "Database Rollback"
             conn.rollback()
             raise e
         finally:
-            #print "Closing Database"
             conn.close()
             
     def updateDevices(self, msg):
-        
         try:
             conn = sqlite3.connect(dataBase)
             cursor = conn.cursor()
             cursor.executemany("INSERT or REPLACE into devices(RFAddress,Type,SerialNo,Name,RoomID,UpdateTime)\
                                  VALUES(?, ?, ?, ?, ?, ?)", msg)
-            #print "Committing Database"
             conn.commit()
             
         except Exception as e:
-            #print "Database Rollback"
             conn.rollback()
             raise e
         finally:
-            #print "Closing Database"
             conn.close()
             
     def updateValves(self, msg):
-        
         try:
             conn = sqlite3.connect(dataBase)
             cursor = conn.cursor()
             cursor.executemany("INSERT or REPLACE into valves(RFAddress,ValvePos,SetTemp,ActTemp,Mode,LinkStatus,Battery)\
                                  VALUES(?, ?, ?, ?, ?, ?, ?)", msg)
-            #print "Committing Database"
             conn.commit()
             
         except Exception as e:
-            #print "Database Rollback"
             conn.rollback()
             raise e
         finally:
-            #print "Closing Database"
             conn.close()
             
     def updateBoiler(self, msg):
-        
         try:
             conn = sqlite3.connect(dataBase)
             cursor = conn.cursor()
             cursor.execute("INSERT or REPLACE into boiler(ID,Time,State)\
                                  VALUES(NULL, ?, ?)", msg)
-            #print "Committing Database"
             conn.commit()
             
         except Exception as e:
-            #print "Database Rollback"
             conn.rollback()
             raise e
         finally:
-            #print "Closing Database"
             conn.close()
             
     def getTemps(self, roomName, currentTime):
@@ -172,6 +156,7 @@ class DbUtils():
             return variables
         
     def getCubes(self):
+        module_logger.debug("Retrieving Cube information")
         conn = sqlite3.connect(dataBase)
         cursor = conn.cursor()
         with conn:

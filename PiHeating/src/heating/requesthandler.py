@@ -4,18 +4,19 @@ import cgi
 from os import curdir, sep, system, execl
 from sys import platform as _platform, executable, argv
 import time
-#from database import DbUtils
-#DB=DbUtils()
 from webui import CreateUIPage
 from graphing import MakeGraph
 from variables import Variables
 from sendmessage import SendMessage
 from max import Max
 from heatinggpio import MyGpio
-#SM = SendMessage()
 VAR = Variables()
 CUI = CreateUIPage()
 GRAPH = MakeGraph()
+
+import logging
+
+module_logger = logging.getLogger("main.requesthandler")
 
 
 
@@ -23,8 +24,7 @@ GRAPH = MakeGraph()
 class MyRequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
-        #roomTemps = CUI.createRooms()
-        #print 'GET ',self.path
+        module_logger.info("GET %s" % self.path)
         if self.path=="/":
             roomTemps = CUI.createRooms()
             self.path="/index.html"
@@ -69,19 +69,19 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             self.path="/graph.html"
             
         elif self.path =="/?confirm=1&boilerswitch=Boiler+Enabled":
-            roomTemps = CUI.createRooms()
+            #roomTemps = CUI.createRooms()
             VAR.writeVariable([['BoilerEnabled', 0]])
             self.path = "/index.html"
-            time.sleep(1)
-            self.updateUIPages(roomTemps)
+            #time.sleep(1)
+            #self.updateUIPages(roomTemps)
             Max().checkHeat()
             
         elif self.path == '/?confirm=1&boilerswitch=Boiler+Disabled':
-            roomTemps = CUI.createRooms()
+            #roomTemps = CUI.createRooms()
             VAR.writeVariable([['BoilerEnabled', 1]])
             self.path = "/index.html"
-            time.sleep(1)
-            self.updateUIPages(roomTemps)
+            #time.sleep(1)
+            #self.updateUIPages(roomTemps)
             Max().checkHeat()
             
         elif self.path =="/admin":
@@ -164,7 +164,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
         
     def do_POST(self):
         roomTemps = CUI.createRooms()
-        #print 'POST ', self.path
+        module_logger.info("POST %s" % self.path)
         if self.path == "/admin":
             self.path = "/admin.html"
             form = cgi.FieldStorage(
@@ -174,6 +174,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
                          'CONTENT_TYPE':self.headers['Content-Type'],
             })
             #print form.keys()
+            module_logger.debug("form keys %s" % form.keys())
             output = []
             for key in form.keys():
                 varList=[]

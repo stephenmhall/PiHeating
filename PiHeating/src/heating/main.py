@@ -9,8 +9,10 @@ test change
 '''
 from __future__ import division
 
-__updated__ = "2015-12-29"
+__updated__ = "2016-01-01"
 
+import logging
+from logging.handlers import RotatingFileHandler
 import threading
 from SocketServer import ThreadingMixIn
 from BaseHTTPServer import HTTPServer
@@ -20,6 +22,9 @@ from database import DbUtils
 from variables import Variables
 from max import Max
 from sys import platform as _platform
+from os import system
+
+
 
 
 
@@ -30,10 +35,30 @@ class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
 class Main():
     
     def __init__(self):
+        #Initialise the Logger
+        
+        logLevel = Variables().readVariables(['LoggingLevel']).rstrip('\r')
+        self.logger = logging.getLogger("main")
+        level = logging.getLevelName(logLevel)
+        self.logger.setLevel(level)
+        #self.logger.setLevel(logging.INFO)
+        
+        fh = RotatingFileHandler("heating.log",
+                                 maxBytes=100000, # 100Kb I think
+                                 backupCount=5)
+        
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        fh.setFormatter(formatter)
+        self.logger.addHandler(fh)
+        
+        self.logger.info("Main has started __init__ has run logger level is %s" % logLevel)
+        
         try:
-            DbUtils().getCubes()
-        except:
+            cube = DbUtils().getCubes()
+            self.logger.info("Database OK cube %s found" % (cube[1]))
+        except Exception, err:
             DbUtils().initialiseDB()
+            self.logger.exception("Database Initialised %s" % err)
 
         self.startKioskServer()
         MyGpio().setupGPIO()
@@ -48,18 +73,24 @@ class Main():
             checkInterval = checkInterval * 2
         if _platform == "linux" or _platform == "linux2":
             MyGpio().heartbeat(checkInterval)
-            #print 'loop interval : ',checkInterval
+            self.logger.debug( "loop interval : %s" %(checkInterval))
             self.doLoop()
         else:
             threading.Timer(checkInterval, self.doLoop).start()
+            self.logger.info('Running Windows timer')
     
-    def startKioskServer(self):        
+    def startKioskServer(self):
         webIP, webPort = Variables().readVariables(['WebIP', 'WebPort'])
-        print 'Web UI Starting on : ', webIP, webPort
-        s_server = ThreadingHTTPServer((webIP, webPort), MyRequestHandler)
-        uithread = threading.Thread(target=s_server.serve_forever)
-        uithread.setDaemon(True)
-        uithread.start()
+        self.logger.info("Web UI Starting on : %s %s" %( webIP, webPort))
+        try:
+            s_server = ThreadingHTTPServer((webIP, webPort), MyRequestHandler)
+            uithread = threading.Thread(target=s_server.serve_forever)
+            uithread.setDaemon(True)
+            uithread.start()
+        except Exception, err:
+            self.logger.error("Unable to start Web Server on %s %s %s" %(webIP, webPort, err))
+            self.logger.critical("Killing all Python processes so cron can restart")
+            system("sudo pkill python")
         
 
 if __name__=='__main__':

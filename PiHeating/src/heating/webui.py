@@ -182,7 +182,6 @@ class CreateUIPage():
         return roomTemps
         
     def pageTop(self):
-        #webRefresh = DB.getVariables()[12]
         webRefresh, baseFontSize = VAR.readVariables(['PageRefresh', 'BaseFontSize'])
         pageText = []
         pageText.append("""

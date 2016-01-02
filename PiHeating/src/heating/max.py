@@ -1,3 +1,5 @@
+
+import logging
 from database import DbUtils
 from variables import Variables
 from webui import CreateUIPage
@@ -21,6 +23,7 @@ boilerOn = 0
 weekDays = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
 outsideTempCheck = 0
 
+module_logger = logging.getLogger("main.max")
 
 class Max():
     
@@ -32,45 +35,44 @@ class Max():
             
             
     def getData(self):
+        self.logger = logging.getLogger("main.max.getData")
         validData = False
         message = ""
         Max_IP, Max_Port = Variables().readVariables(['MaxIP', 'MaxPort'])
-        print 'Max Connection Starting on : ',Max_IP, Max_Port
+        self.logger.info('Max Connection Starting on : %s %s ' % (Max_IP, Max_Port))
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.settimeout(1)
-            print 'Socket Created'
+            self.logger.info('Socket Created')
         except socket.error:
-            print 'Failed to create socket'
+            self.logger.exception("unable to create socket")
             s.close()
             sys.exit()
              
         #Connect to remote server
         try:
             s.connect((Max_IP, int(Max_Port)))
-            print 'Socket Connected to Max on ip ' + Max_IP
-        except:
+            self.logger.info('Socket Connected to Max on ip %s' % Max_IP)
+        except Exception, err:
             s.close()
             Variables().writeVariable([['CubeOK', 0]])
-            #MyGpio().cubeState(0)
-            print "Unable to make connection Trying later"
+            self.logger.exception("unable to make connection, trying later %s" % err)
             CreateUIPage().updateWebUI()
             return (message, validData)
          
         try:
             while 1:
                 reply = s.recv(1024)
-                #print reply
                 message += reply
         except:
-            print "Message ended"
+            self.logger.info("Message ended")
             
         if message != "":
             Variables().writeVariable([['CubeOK', 1]])
-            #MyGpio().cubeState(1)
             validData = True
             
         s.close()
+        self.logger.debug(message)
         return (message, validData) 
     
     def parseData(self, message):
@@ -301,11 +303,9 @@ class Max():
                 _ = requests.get(veraControl.format(Vera_Address, Vera_Port, 
                                                     Vera_Device, str(boilerState)), timeout=5)
                 Variables().writeVariable([['VeraOK', 1]])
-                #MyGpio().veraState(1)
                 print 'message sent to Vera'
             except:
                 Variables().writeVariable([['VeraOK', 0]])
-                #MyGpio().veraState(0)
                 print "vera is unreachable"
         else:
             boilerState = 0
@@ -313,11 +313,9 @@ class Max():
                 _ = requests.get(veraControl.format(Vera_Address, Vera_Port, 
                                                     Vera_Device, boilerState), timeout=5)
                 Variables().writeVariable([['VeraOK', 1]])
-                #MyGpio().veraState(1)
                 print "Boiler is Disabled"
             except:
                 Variables().writeVariable([['VeraOK', 0]])
-                #MyGpio().veraState(0)
                 print "vera is unreachable"
         try:
             boilerOn = DbUtils().getBoiler()[2]
@@ -326,14 +324,9 @@ class Max():
             
         if boilerState != boilerOn:
             msg = (logTime,boilerState)
-            #print 'switch heat DbUtils() message ', msg
             DbUtils().updateBoiler(msg)
         boilerOn = boilerState
-#         try:
-#             MyGpio().boilerState(boilerEnabled)
-#             MyGpio().heatingState(boilerState)
-#         except:
-#             print 'Unable to set GPIO outputs'
+
         # Create UI Pages
         CreateUIPage().saveUI(roomTemps)
         CreateUIPage().saveAdminUI()

@@ -5,6 +5,7 @@ Created on 6 Dec 2015
 '''
 
 #import requests
+import logging
 import binascii
 import socket
 import sys
@@ -29,6 +30,7 @@ class SendMessage(object):
         self.baseString = "000440000000"
         
         
+        
     def s_Command(self, rfAddress, roomID, thermostatMode, setpointTemperature):
         """
         Base String        6           000440000000
@@ -50,14 +52,13 @@ class SendMessage(object):
                             10=vacation
                             11=boost
         """
+        self.logger = logging.getLogger("main.sendmessage.s_Command")
+        self.logger.info("creating s command")
         self.rfAddress = rfAddress
-        self.roomID = format(int(roomID), '02x')
-        #bits = ''
-        #print 'room ID : ', self.roomID
-        
+        self.roomID = format(int(roomID), '02x')        
         self.setpointTemperature = int(float(setpointTemperature) * 2)
         bits = '{0:06b}'.format(self.setpointTemperature)
-        print 'setpoint temp in bits : ', bits
+        self.logger.debug("setpoint temp in bits : %s" % bits)
         
         if thermostatMode != 'none':
             if thermostatMode == 'MANUAL':
@@ -69,9 +70,9 @@ class SendMessage(object):
             else:
                 bits = '00' + bits
         
-        print 'bits with mode added : ', bits
+        self.logger.debug("bits with mode added : %s" % bits)
         bits = hex(int(bits, 2))[2:]
-        print 'temp bits as Hex : ', bits
+        self.logger.debug("temp bits as Hex : %s" % bits)
         if bits == '0':
             bits = '00'
             
@@ -80,10 +81,9 @@ class SendMessage(object):
         else:
             commandString = self.baseString + self.rfAddress + self.roomID + bits
             
-        
-        print 'command string : ', commandString
+        self.logger.debug("command string : %s" % commandString)
         commandString = self.hextoBase64(commandString)
-        #print 'encoded string : ', commandString
+        self.logger.debug("Encoded string : %s" % commandString)
         return commandString
     
     def hextoBase64(self, hexnumber):
@@ -99,25 +99,26 @@ class SendMessage(object):
     
     
     def sendMAX(self, commandString):
+        self.logger = logging.getLogger("main.sendmessage.sendMAX")
         sendString = 's:{}\r\n'.format(commandString)
         Max_IP, Max_Port = VAR.readVariables(['MaxIP', 'MaxPort'])
-        print 'Max Connection Starting on : ',Max_IP, Max_Port
+        self.logger.info("Sending s command to MAX on : %s" % (Max_IP, Max_Port))
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.settimeout(1)
-            print 'Socket Created'
+            self.logger.debug("Max Socket Created")
         except socket.error:
-            print 'Failed to create Send socket'
+            self.logger.exception("Failed to create MAX socket")
             s.close()
             sys.exit()
              
         #Connect to remote server
         try:
             s.connect((Max_IP, int(Max_Port)))
-            print 'Socket Connected to Max on ip ' + Max_IP
-        except:
+            self.logger.debug("Connected to Max on ip %s" % Max_IP)
+        except Exception, err:
             s.close()
-            print "Unable to make connection Trying later"
+            self.logger.exception("Unable to make MAX connection Trying later %s" % err)
             return
          
         
@@ -125,12 +126,9 @@ class SendMessage(object):
         try:
             while 1:
                 reply = s.recv(1024)
-                #print reply
                 message += reply
         except:
-            print "Message ended"
-            
-        #print 'connect message : ', message
+            pass
             
         if message != "":
             validData = True
@@ -139,46 +137,45 @@ class SendMessage(object):
             try:
                 while 1:
                     reply = s.recv(1024)
-                    #print reply
                     message += reply
             except:
                 pass
             
         s.close()
-        #print 'S Message : ', message
+        self.logger.debug("MAX send message reply %s" % message)
         return message
     
     
     def updateRoom(self, roomData):
+        self.logger = logging.getLogger("main.sendmessage.updateRoom")
+        self.logger.info("Updating rooms")
         roomList = DbUtils().getRooms()
-        #print roomList
-        print roomData
+        self.logger.debug("roomList %s" % roomList)
+        self.logger.debug("roomData %s" % roomData)
         roomSplit = roomData.split('?')
         mode = roomSplit[1].replace('%20', ' ')
         room = roomSplit[2].replace('%20', ' ')
         temp = roomSplit[3].replace('%20', ' ')
-        #print room, mode, temp
+        self.logger.debug("room %s mode %s temp %s" % (room, mode, temp))
         
         if mode == 'eco':
             for rooms in roomList:
                 sCommand = self.s_Command(rooms[2], rooms[0], 'none', 0.0)
-                #print sCommand
+                self.logger.debug("eco sCommand %s" % sCommand)
                 self.sendMAX(sCommand)
                 time.sleep(0.8)
                 
         if mode == 'ECO':
             for rooms in roomList:
                 if room == rooms[1]:
-                    #print room
-                    #print rooms[2], rooms[0], mode, temp
                     sCommand = self.s_Command(rooms[2], rooms[0], 'none', 0.0)
-                    #print 'Sending command : ', sCommand
+                    self.logger.debug("ECO sCommand %s" % sCommand)
                     self.sendMAX(sCommand)
                 
         elif mode == 'auto':
             for rooms in roomList:
                 sCommand = self.s_Command(rooms[2], rooms[0], 'AUTO', 0.0)
-                #print sCommand
+                self.logger.debug("auto sCommand %s" % sCommand)
                 self.sendMAX(sCommand)
                 time.sleep(0.8)
         
@@ -186,10 +183,8 @@ class SendMessage(object):
             # For standard room change
             for rooms in roomList:
                 if room == rooms[1]:
-                    #print room
-                    #print rooms[2], rooms[0], mode, temp
                     sCommand = self.s_Command(rooms[2], rooms[0], mode, temp)# rf address,room Number, mode, temp
-                    #print 'Sending command : ', sCommand
+                    self.logger.debug("standard sCommand %s" % sCommand)
                     self.sendMAX(sCommand)
                 
         CreateUIPage().updateWebUI()

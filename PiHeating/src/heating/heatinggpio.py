@@ -2,15 +2,15 @@ from sys import platform as _platform
 if _platform == "linux" or _platform == "linux2":
     import RPi.GPIO as GPIO
     
-#from threading import Thread
+import logging
 import threading
 from variables import Variables
 from database import DbUtils
 from max import Max
 from os import system
-
-
 import time
+
+module_logger = logging.getLogger("main.heatinggpio")
 
 myThreads = []
 
@@ -20,6 +20,7 @@ class HeartbeatThread(threading.Thread):
         super(HeartbeatThread, self).__init__()
         self.beat_time = beat_time
         self._stop = threading.Event()
+        self.logger = logging.getLogger("main.heatinggpio.heartbeatthread")
         
     def stop(self):
         self._stop.set()
@@ -29,7 +30,7 @@ class HeartbeatThread(threading.Thread):
         return 'Thread stop condition : ',self._stop.is_set()
     
     def run(self):
-        #print 'heating state: ', heating_state
+        self.logger.info("starting heart beat for %s" % self.beat_time)
         # Set Cube Lights
         heart = GPIO.PWM(27, 100)
         pause_time = 0.02
@@ -45,10 +46,10 @@ class HeartbeatThread(threading.Thread):
                 time.sleep(pause_time)
             startTime = time.time()
             if self._stop.is_set():
-                print 'heartbeat stop event is YES'
+                self.logger.info("heartbeat stop event is YES")
                 break
         
-        print 'stopping thread'
+        self.logger.debug("stopping heartbeat thread")
         heart.stop()
         GPIO.output(04,GPIO.LOW)
         GPIO.output(17,GPIO.LOW)
@@ -64,11 +65,14 @@ class MyGpio(object):
     '''
     classdocs
     '''
+    def __init__(self):
+        self.logger = logging.getLogger("main.heatinggpio.MyGpio")
 
     def setupGPIO(self):
         '''
         Constructor
         '''
+        self.logger.info("Setting up GPIO Pins")
         if _platform == "linux" or _platform == "linux2":
                 
             GPIO.setmode(GPIO.BCM)
@@ -94,7 +98,7 @@ class MyGpio(object):
         
 
     def buttonDisableBoiler(self, channel):
-        print 'Button Disable Boiler pressed'
+        self.logger.info('Button Disable Boiler pressed, channel %s' % channel)
         boilerState = Variables().readVariables(['BoilerEnabled'])
         if boilerState == 1:
             boilerState = 0
@@ -104,14 +108,14 @@ class MyGpio(object):
         
         # Set Boiler State
         if boilerState:
-            print 'GPIO boiler on'
+            self.logger.debug('GPIO boiler on')
             GPIO.output(04,GPIO.LOW)
         else:
-            print 'GPIO boiler off'
+            self.logger.debug('GPIO boiler off')
             GPIO.output(04,GPIO.HIGH)
         
     def buttonCheckHeat(self, channel):
-        print 'button Check Heat' 
+        self.logger.info('Button check heat pressed, channel %s' % channel)
         
         GPIO.output(04,GPIO.LOW)
         GPIO.output(17,GPIO.LOW)
@@ -137,13 +141,12 @@ class MyGpio(object):
         self.setStatusLights()
     
     def buttonReboot(self, channel):
-        print 'button Reboot'
+        self.logger.info('Button Reboot pressed, channel %s' % channel)
         buttonPressTimer = 0
         while True:
             if (GPIO.input(channel) == False):
                 buttonPressTimer += 1
                 if buttonPressTimer > 4:
-                    print 'rebooting'
                     ledFlash = GPIO.PWM(23, 30)
                     ledFlash.start(50)
                 elif buttonPressTimer == 2:
@@ -157,10 +160,10 @@ class MyGpio(object):
                     ledFlash.start(50)
             else:
                 if buttonPressTimer > 4:
-                    print 'rebooting NOW'
+                    self.logger.warning("Rebooting now")
                     system("sudo reboot")
                 elif buttonPressTimer <= 4:
-                    print 'not long enough press for reboot'
+                    self.logger.info('not long enough press for reboot')
                 buttonPressTimer = 0
                 ledFlash.stop()
                 self.setStatusLights()
@@ -171,7 +174,7 @@ class MyGpio(object):
         
     
     def buttonShutdown(self, channel):
-        print 'button Shutdown', channel
+        self.logger.info('Button Shutdown pressed, channel %s' % channel)
         buttonPressTimer = 0
         while True:
             if (GPIO.input(channel) == False):
@@ -191,10 +194,10 @@ class MyGpio(object):
                     ledFlash.start(50)
             else:
                 if buttonPressTimer > 4:
-                    print 'shutting down NOW'
+                    self.logger.warning("Shutting down now")
                     system("sudo shutdown -h now")
                 elif buttonPressTimer <= 4:
-                    print 'not long enough press for shutdown'
+                    self.logger.info('not long enough press for shutdown')
                 buttonPressTimer = 0
                 ledFlash.stop()
                 self.setStatusLights()
@@ -207,8 +210,7 @@ class MyGpio(object):
     def heartbeat(self, beatTime):
         self.setStatusLights()
         if _platform == "linux" or _platform == "linux2":
-            
-            print 'GPIO for :', beatTime
+            self.logger.info("starting Heart Beat thread")
             self.heartbeat_thread = HeartbeatThread(beatTime)
             self.heartbeat_thread.start()
             self.heartbeat_thread.join()
@@ -218,40 +220,35 @@ class MyGpio(object):
     def setStatusLights(self):
         cube_state, vera_state, boiler_enabled = Variables().readVariables(['CubeOK', 'VeraOK', 'BoilerEnabled'])
         heating_state = DbUtils().getBoiler()[2]
+        self.logger.debug("setting status lights")
         if cube_state:
-            #print 'GPIO cube ok'
             GPIO.output(22,GPIO.HIGH)
             GPIO.output(23,GPIO.LOW)
         else:
-            #print 'GPIO cube error'
             GPIO.output(22,GPIO.LOW)
             GPIO.output(23,GPIO.HIGH)
             
         # Set Vera Lights
         if vera_state:
-            #print 'GPIO vera ok'
             GPIO.output(24,GPIO.HIGH)
             GPIO.output(25,GPIO.LOW)
         else:
             GPIO.output(24,GPIO.LOW)
             GPIO.output(25,GPIO.HIGH)
-            #print 'GPIO vera error'
             
         # Set Heating State
         if heating_state:
-            #print 'GPIO heating on'
             GPIO.output(17,GPIO.HIGH)
             GPIO.output(18,GPIO.LOW)
         else:
-            #print 'GPIO heating off'
             GPIO.output(17,GPIO.LOW)
             GPIO.output(18,GPIO.HIGH)
             
         # Set Boiler State
         if boiler_enabled:
-            #print 'GPIO boiler on'
             GPIO.output(04,GPIO.LOW)
         else:
-            #print 'GPIO boiler off'
             GPIO.output(04,GPIO.HIGH)
+            self.logger.info("Starting flashing boiler light")
+
             

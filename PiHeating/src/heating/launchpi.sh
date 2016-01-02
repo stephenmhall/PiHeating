@@ -4,5 +4,5 @@
 
 cd /
 cd home/pi/heating
-sudo python main.py
+python bootup.py
 cd /
