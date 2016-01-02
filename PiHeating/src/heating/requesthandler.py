@@ -51,17 +51,23 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             time.sleep(1)
             
         elif self.path[0:10] == '/heatcheck':
-            #roomData = self.path
-            #Max().checkHeat()
-            MyGpio().buttonCheckHeat(1)
+            if _platform == "linux" or _platform == "linux2":
+                MyGpio().buttonCheckHeat(1)
+            else:
+                Max().checkHeat()
             self.path="/index.html"
             
         elif self.path[0:5] == '/mode':
             roomData = self.path
             SendMessage().updateRoom(roomData)
+            if _platform == "linux" or _platform == "linux2":
+                MyGpio().flashCube()
             self.path="/index.html"
             time.sleep(1)
-            Max().checkHeat()
+            if _platform == "linux" or _platform == "linux2":
+                MyGpio().buttonCheckHeat(1)
+            else:
+                Max().checkHeat()
             
         elif self.path[0:6] == '/graph':
             roomName = self.path

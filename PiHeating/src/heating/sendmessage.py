@@ -53,7 +53,7 @@ class SendMessage(object):
                             11=boost
         """
         self.logger = logging.getLogger("main.sendmessage.s_Command")
-        self.logger.info("creating s command")
+        self.logger.info("creating s command for %s %s %s %s" %(rfAddress, roomID, thermostatMode, setpointTemperature))
         self.rfAddress = rfAddress
         self.roomID = format(int(roomID), '02x')        
         self.setpointTemperature = int(float(setpointTemperature) * 2)
@@ -102,7 +102,7 @@ class SendMessage(object):
         self.logger = logging.getLogger("main.sendmessage.sendMAX")
         sendString = 's:{}\r\n'.format(commandString)
         Max_IP, Max_Port = VAR.readVariables(['MaxIP', 'MaxPort'])
-        self.logger.info("Sending s command to MAX on : %s" % (Max_IP, Max_Port))
+        self.logger.info("Sending s command to MAX on : %s %s" % (Max_IP, Max_Port))
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.settimeout(1)

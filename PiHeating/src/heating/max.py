@@ -247,17 +247,19 @@ class Max():
         """
         Get Current outside temperature from OpenWeatherMap using the API
         """
+        self.logger = logging.getLogger("main.max.getCurrentOutsidetemp")
         try:
             cityID, userKey = Variables().readVariables(['WeatherCityID', 'WeatherKey'])
             f = urllib2.urlopen('http://api.openweathermap.org/data/2.5/weather?id={}&APPID={}'.format(cityID,userKey))
             json_string = f.read()
             parsed_json = json.loads(json_string)
-            temp_c = parsed_json['main']['temp'] # kelvin -273.15
-            temp_c = int(temp_c) - 273.15
+            temp_k = parsed_json['main']['temp'] # kelvin -273.15
+            temp_c = temp_k - 273.15
             f.close()
+            self.logger.info("Outside temp is %sK %sC" % (temp_k,temp_c))
             return temp_c
-        except:
-            print "no temp"
+        except Exception, err:
+            self.logger.exception("No temp data %s" % err)
         
     def switchHeat(self):
         logTime = time.time()

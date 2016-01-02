@@ -222,8 +222,17 @@ class MyGpio(object):
                 self.setStatusLights()
                 break
             time.sleep(1)
-                    
             
+    def flashCube(self):
+        t1 = threading.Thread(target=self.flashLedThread(self.C_ERR, 2, 5, 50))
+        t1.start()
+        t1.join()
+                    
+    def flashLedThread(self, channel, flashTime, frequencie, brightness):
+        ledFlash = GPIO.PWM(channel, frequencie)
+        ledFlash.start(brightness)
+        time.sleep(flashTime)
+        ledFlash.stop()
         
 
     def heartbeat(self, beatTime):

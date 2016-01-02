@@ -20,17 +20,12 @@ from requesthandler import MyRequestHandler
 from heatinggpio import MyGpio
 from database import DbUtils
 from variables import Variables
-from max import Max
 from sys import platform as _platform
 from os import system
 
 
-
-
-
 class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
     """Handle requests is separate thread"""
-    
     
 class Main():
     
@@ -44,7 +39,7 @@ class Main():
         #self.logger.setLevel(logging.INFO)
         
         fh = RotatingFileHandler("heating.log",
-                                 maxBytes=100000, # 100Kb I think
+                                 maxBytes=1000000, # 1Mb I think
                                  backupCount=5)
         
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -68,15 +63,17 @@ class Main():
             
     def doLoop(self):
         checkInterval, boiler_enabled = Variables().readVariables(['Interval', 'BoilerEnabled'])
-        #Max().checkHeat()
-        MyGpio().buttonCheckHeat(0)
+        
         if boiler_enabled != 1:
             checkInterval = checkInterval * 2
         if _platform == "linux" or _platform == "linux2":
+            MyGpio().buttonCheckHeat(0)
             MyGpio().heartbeat(checkInterval)
             self.logger.debug( "loop interval : %s" %(checkInterval))
             self.doLoop()
         else:
+            from max import Max
+            Max().checkHeat()
             threading.Timer(checkInterval, self.doLoop).start()
             self.logger.info('Running Windows timer')
     

@@ -22,11 +22,10 @@ class CreateUIPage():
         self.dutyCycle()
         pageText = []
         pageText.append(self.pageTop())
-        pageText.append(self.pageHeader())
+        pageText.append(self.pageHeader('Main UI'))
         pageText.append(self.roomTable(roomTemps))
         pageText.append(self.buttonLayout())
         pageText.append(self.weatherWidget())
-        pageText.append(self.adminButton())
         pageText.append(self.filler())
         pageText.append(self.page_bottom())
         
@@ -40,9 +39,8 @@ class CreateUIPage():
         #print 'SAVE ADMIN UI'
         pageText = []
         pageText.append(self.pageTop())
-        pageText.append(self.pageHeader())
+        pageText.append(self.pageHeader('Admin'))
         pageText.append(self.buttonLayout())
-        pageText.append(self.homeButton())
         pageText.append(self.variablesPage())
         pageText.append(self.shutdownButton())
         pageText.append(self.filler())
@@ -325,6 +323,7 @@ class CreateUIPage():
                 .bg-2 { 
                     background-color: #474e5d; /* Dark Blue */
                     color: #ffffff;
+                    vertical-align: middle;
                 }
                 .bg-3 { 
                     background-color: #ddd; /* Grey */
@@ -338,6 +337,18 @@ class CreateUIPage():
                     font-size: %svw
                 }
                 
+                .parent {
+                    display: table;
+                    table-layout: fixed;
+                }
+                
+                .child {
+                    display:table-cell;
+                    vertical-align:middle;
+                    text-align:center;
+                    float: none;
+                }
+                
               </style>
         </head>
         <body onload=display_ct();>""" % baseFontSize)
@@ -345,18 +356,33 @@ class CreateUIPage():
         return html_text
     
     
-    def pageHeader(self):
+    def pageHeader(self, pageType):
         
-        heat_Interval, boiler_enabled = VAR.readVariables(['Interval', 'BoilerEnabled'])
+        if pageType == 'Main UI':
+            buttonText = """<a href="/admin.html" class="btn btn-warning btn-md" role="button">Admin Page</a>"""
+        else:
+            buttonText = """<a href="/index.html" class="btn btn-warning btn-md" role="button">Main UI</a>"""
+        
+        webRefresh, heat_Interval, boiler_enabled = VAR.readVariables(['PageRefresh', 'Interval', 'BoilerEnabled'])
         
         theTime = self.OnUpdateTime()
         if boiler_enabled != 1:
             heat_Interval = heat_Interval * 2
         html_text = """
         <div class="container-fluid bg-2 text-center">
-            <h2>Heating Status @ {} <span class="badge">{}</span></h2>
+            <div class="row parent">
+                <div class="col-sm-1 child">
+                    {}
+                </div>
+                <div class="col-sm-10 child">
+                    <h2>Heating Status @ {} <span class="badge">{}</span></h2>
+                </div>
+                <div class="col-sm-1 child">
+                    <a href="/index.html" class="btn btn-primary" role="button">Refresh Page <span class="badge">{}</span></a>
+                </div>
+            </div>
         </div>
-        <main id="content" role="main">""".format(theTime, heat_Interval)
+        <main id="content" role="main">""".format(buttonText, theTime, heat_Interval, webRefresh)
         return html_text
     
     def roomTable(self, roomTemps):
@@ -364,7 +390,6 @@ class CreateUIPage():
         pageText = []
         pageText.append("""
             <div class="container-fluid bg-3">
-            <div class="well well-sm">
             <div class="btn-group btn-group-justified">
                 <a href="#" class="btn btn-default btn-lg" style="font-size: {0}vw;"><B>HOUSE MODE</B></a>
                 <a href="/automode?auto?00?0" class="btn btn-default btn-lg" style="font-size: {0}vw;"><span class="glyphicon glyphicon-time"></span><B> AUTO</B></a>
@@ -372,8 +397,6 @@ class CreateUIPage():
                 <a href="#" class="btn btn-default btn-lg" style="font-size: {0}vw;"><span class="glyphicon glyphicon-asterisk"></span><B> COMFORT</B></a>
                 <a href="#" class="btn btn-default btn-lg" style="font-size: {0}vw;"><span class="glyphicon glyphicon-pencil"></span><B> CUSTOM</B></a>
             </div>
-            </div>
-            <div class="well well-sm">
             <div class="btn-group btn-group-justified">
                 <a href="/rangegraph.html" class="btn btn-default btn-lg" style="font-size: {0}vw;"><B>ROOM</B></a>
                 <a href="#" class="btn btn-default btn-lg" style="font-size: {0}vw;"><B>MODE</B></a>
@@ -452,7 +475,6 @@ class CreateUIPage():
         </div>
         """.format(cold_text,roomText,setTemp,truTemp,valvePos,baseFontSize - 1.2))
         pageText.append("""
-        </div>
         </div>""")
         maxLayout = ''.join(pageText)
         return maxLayout
@@ -507,30 +529,6 @@ class CreateUIPage():
           """.format(boilerIsOn,heatIsOn,heating_cycle,cubeIsOn,duty_cycle,veraIsOn,baseFontSize - 1.8)
         return html_text
     
-    def adminButton(self):
-        #webRefresh = DB.getVariables()[12]
-        webRefresh = VAR.readVariables(['PageRefresh'])
-        html_text = """
-        <div class="container-fluid bg-3 text-center">
-            <div class="btn-group btn-group-lg">
-                <a href="/admin.html" class="btn btn-warning" role="button">Admin Page</a>
-                <a href="/index.html" class="btn btn-primary" role="button">Refresh Page <span class="badge">{}</span></a>
-            </div>
-        </div>""".format(webRefresh)
-        return html_text
-    
-    def homeButton(self):
-        #webRefresh = DB.getVariables()[12]
-        webRefresh = VAR.readVariables(['PageRefresh'])
-        html_text = """
-        <div class="container-fluid bg-3 text-center">
-            <div class="btn-group btn-group-lg">
-                <a href="/index.html" class="btn btn-warning" role="button">Main UI</a>
-                <a href="/index.html" class="btn btn-primary" role="button">Refresh Page <span class="badge">{}</span></a>
-            </div>
-        </div>""".format(webRefresh)
-        return html_text
-    
     def variablesPage(self):
         pageText = []
         pageText.append("""<div class="container-fluid bg-2">
@@ -542,10 +540,9 @@ class CreateUIPage():
                 pageText.append("""
                 <div class="form-group">
                     <label class="control-label col-xs-3" for="{0}">{0}:</label>
-                        <div class="col-xs-5">
+                        <div class="col-xs-9">
                             <input type="text" class="form-control" id="{0}" name="{0}" value="{1}">
                         </div>
-                        <div class="col-xs-4"></div>
                     </div>
                 """.format(_text[0],_text[1]))
                 
