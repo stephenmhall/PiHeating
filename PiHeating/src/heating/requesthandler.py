@@ -24,7 +24,7 @@ module_logger = logging.getLogger("main.requesthandler")
 class MyRequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
-        module_logger.info("GET %s" % self.path)
+        module_logger.debug("GET %s" % self.path)
         if self.path=="/":
             roomTemps = CUI.createRooms()
             self.path="/index.html"

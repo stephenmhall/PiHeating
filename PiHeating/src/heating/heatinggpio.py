@@ -67,6 +67,18 @@ class MyGpio(object):
     '''
     def __init__(self):
         self.logger = logging.getLogger("main.heatinggpio.MyGpio")
+        self.B_OFF = 04
+        self.H_ON  = 17
+        self.H_OFF = 18
+        self.C_OK  = 22
+        self.C_ERR = 23
+        self.V_OK  = 24
+        self.V_ERR = 25
+        self.HBEAT = 27
+        self.ON_OFF = 05
+        self.CHECKH = 06
+        self.SHUTDOWN = 12
+        self.REBOOT   = 13
 
     def setupGPIO(self):
         '''
@@ -74,27 +86,30 @@ class MyGpio(object):
         '''
         self.logger.info("Setting up GPIO Pins")
         if _platform == "linux" or _platform == "linux2":
+            
+            
+            
                 
             GPIO.setmode(GPIO.BCM)
             GPIO.setwarnings(False)
-            GPIO.setup(04,GPIO.OUT) # Boiler Disabled
-            GPIO.setup(17,GPIO.OUT) # Heat ON
-            GPIO.setup(18,GPIO.OUT) # Heat Off
-            GPIO.setup(22,GPIO.OUT) # Cube OK
-            GPIO.setup(23,GPIO.OUT) # Cube Error
-            GPIO.setup(24,GPIO.OUT) # Vera Ok
-            GPIO.setup(25,GPIO.OUT) # Vera Error
-            GPIO.setup(27,GPIO.OUT) # Heart beat
-            GPIO.setup(05,GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Disable Heat Button
-            GPIO.setup(06,GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Check Heat
-            GPIO.setup(12,GPIO.IN, pull_up_down=GPIO.PUD_UP)  # 
-            GPIO.setup(13,GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Reboot Raspberry Pi
+            GPIO.setup(self.B_OFF,GPIO.OUT) # Boiler Disabled
+            GPIO.setup(self.H_ON,GPIO.OUT) # Heat ON
+            GPIO.setup(self.H_OFF,GPIO.OUT) # Heat Off
+            GPIO.setup(self.C_OK,GPIO.OUT) # Cube OK
+            GPIO.setup(self.C_ERR,GPIO.OUT) # Cube Error
+            GPIO.setup(self.V_OK,GPIO.OUT) # Vera Ok
+            GPIO.setup(self.V_ERR,GPIO.OUT) # Vera Error
+            GPIO.setup(self.HBEAT,GPIO.OUT) # Heart beat
+            GPIO.setup(self.ON_OFF,GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Disable Heat Button
+            GPIO.setup(self.CHECKH,GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Check Heat
+            GPIO.setup(self.SHUTDOWN,GPIO.IN, pull_up_down=GPIO.PUD_UP)  # 
+            GPIO.setup(self.REBOOT,GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Reboot Raspberry Pi
 #             
 #             
-            GPIO.add_event_detect(05,GPIO.FALLING, callback=self.buttonDisableBoiler, bouncetime=500)# 05
-            GPIO.add_event_detect(06,GPIO.FALLING, callback=self.buttonCheckHeat, bouncetime=500)    # 06
-            GPIO.add_event_detect(12,GPIO.FALLING, callback=self.buttonShutdown, bouncetime=500)     # 12
-            GPIO.add_event_detect(13,GPIO.FALLING, callback=self.buttonReboot, bouncetime=500)       # 13
+            GPIO.add_event_detect(self.ON_OFF,GPIO.FALLING, callback=self.buttonDisableBoiler, bouncetime=500)# 05
+            GPIO.add_event_detect(self.CHECKH,GPIO.FALLING, callback=self.buttonCheckHeat, bouncetime=500)    # 06
+            GPIO.add_event_detect(self.SHUTDOWN,GPIO.FALLING, callback=self.buttonShutdown, bouncetime=500)     # 12
+            GPIO.add_event_detect(self.REBOOT,GPIO.FALLING, callback=self.buttonReboot, bouncetime=500)       # 13
         
 
     def buttonDisableBoiler(self, channel):
@@ -109,33 +124,37 @@ class MyGpio(object):
         # Set Boiler State
         if boilerState:
             self.logger.debug('GPIO boiler on')
-            GPIO.output(04,GPIO.LOW)
+            GPIO.output(self.B_OFF,GPIO.LOW)
         else:
             self.logger.debug('GPIO boiler off')
-            GPIO.output(04,GPIO.HIGH)
+            GPIO.output(self.B_OFF,GPIO.HIGH)
         
     def buttonCheckHeat(self, channel):
         self.logger.info('Button check heat pressed, channel %s' % channel)
         
-        GPIO.output(04,GPIO.LOW)
-        GPIO.output(17,GPIO.LOW)
-        GPIO.output(18,GPIO.LOW)
-        GPIO.output(22,GPIO.LOW)
-        GPIO.output(23,GPIO.LOW)
-        GPIO.output(24,GPIO.LOW)
-        GPIO.output(25,GPIO.LOW)
+        GPIO.output(self.B_OFF,GPIO.LOW)
+        GPIO.output(self.H_ON,GPIO.LOW)
+        GPIO.output(self.H_OFF,GPIO.LOW)
+        GPIO.output(self.C_OK,GPIO.LOW)
+        GPIO.output(self.C_ERR,GPIO.LOW)
+        GPIO.output(self.V_OK,GPIO.LOW)
+        GPIO.output(self.V_ERR,GPIO.LOW)
 
         
         for _ in range(4):
-            GPIO.output(17,GPIO.HIGH)
-            time.sleep(.2)
-            GPIO.output(17,GPIO.LOW)
-            GPIO.output(18,GPIO.HIGH)
-            time.sleep(.2)
-            GPIO.output(18,GPIO.LOW)
-            GPIO.output(22,GPIO.HIGH)
-            time.sleep(.2)
-            GPIO.output(22,GPIO.LOW)
+            sleepTime = 0.1
+            GPIO.output(self.H_ON,GPIO.HIGH)
+            time.sleep(sleepTime)
+            GPIO.output(self.H_ON,GPIO.LOW)
+            GPIO.output(self.H_OFF,GPIO.HIGH)
+            time.sleep(sleepTime)
+            GPIO.output(self.H_OFF,GPIO.LOW)
+            GPIO.output(self.C_ERR,GPIO.HIGH)
+            time.sleep(sleepTime)
+            GPIO.output(self.C_ERR,GPIO.LOW)
+            GPIO.output(self.C_OK,GPIO.HIGH)
+            time.sleep(sleepTime)
+            GPIO.output(self.C_OK,GPIO.LOW)
         
         Max().checkHeat()
         self.setStatusLights()
@@ -147,16 +166,16 @@ class MyGpio(object):
             if (GPIO.input(channel) == False):
                 buttonPressTimer += 1
                 if buttonPressTimer > 4:
-                    ledFlash = GPIO.PWM(23, 30)
+                    ledFlash = GPIO.PWM(self.C_ERR, 30)
                     ledFlash.start(50)
                 elif buttonPressTimer == 2:
-                    ledFlash = GPIO.PWM(23, 5)
+                    ledFlash = GPIO.PWM(self.C_ERR, 5)
                     ledFlash.start(50)
                 elif buttonPressTimer == 3:
-                    ledFlash = GPIO.PWM(23, 10)
+                    ledFlash = GPIO.PWM(self.C_ERR, 10)
                     ledFlash.start(50)
                 elif buttonPressTimer < 3:
-                    ledFlash = GPIO.PWM(23, 2)
+                    ledFlash = GPIO.PWM(self.C_ERR, 2)
                     ledFlash.start(50)
             else:
                 if buttonPressTimer > 4:
@@ -181,16 +200,16 @@ class MyGpio(object):
                 buttonPressTimer += 1
                 if buttonPressTimer > 4:
                     print 'shutting down'
-                    ledFlash = GPIO.PWM(25, 30)
+                    ledFlash = GPIO.PWM(self.V_ERR, 30)
                     ledFlash.start(50)
                 elif buttonPressTimer == 2:
-                    ledFlash = GPIO.PWM(25, 5)
+                    ledFlash = GPIO.PWM(self.V_ERR, 5)
                     ledFlash.start(50)
                 elif buttonPressTimer == 3:
-                    ledFlash = GPIO.PWM(25, 10)
+                    ledFlash = GPIO.PWM(self.V_ERR, 10)
                     ledFlash.start(50)
                 elif buttonPressTimer < 3:
-                    ledFlash = GPIO.PWM(25, 2)
+                    ledFlash = GPIO.PWM(self.V_ERR, 2)
                     ledFlash.start(50)
             else:
                 if buttonPressTimer > 4:
@@ -222,33 +241,33 @@ class MyGpio(object):
         heating_state = DbUtils().getBoiler()[2]
         self.logger.debug("setting status lights")
         if cube_state:
-            GPIO.output(22,GPIO.HIGH)
-            GPIO.output(23,GPIO.LOW)
+            GPIO.output(self.C_OK,GPIO.HIGH)
+            GPIO.output(self.C_ERR,GPIO.LOW)
         else:
-            GPIO.output(22,GPIO.LOW)
-            GPIO.output(23,GPIO.HIGH)
+            GPIO.output(self.C_OK,GPIO.LOW)
+            GPIO.output(self.C_ERR,GPIO.HIGH)
             
         # Set Vera Lights
         if vera_state:
-            GPIO.output(24,GPIO.HIGH)
-            GPIO.output(25,GPIO.LOW)
+            GPIO.output(self.V_OK,GPIO.HIGH)
+            GPIO.output(self.V_ERR,GPIO.LOW)
         else:
-            GPIO.output(24,GPIO.LOW)
-            GPIO.output(25,GPIO.HIGH)
+            GPIO.output(self.V_OK,GPIO.LOW)
+            GPIO.output(self.V_ERR,GPIO.HIGH)
             
         # Set Heating State
         if heating_state:
-            GPIO.output(17,GPIO.HIGH)
-            GPIO.output(18,GPIO.LOW)
+            GPIO.output(self.H_ON,GPIO.HIGH)
+            GPIO.output(self.H_OFF,GPIO.LOW)
         else:
-            GPIO.output(17,GPIO.LOW)
-            GPIO.output(18,GPIO.HIGH)
+            GPIO.output(self.H_ON,GPIO.LOW)
+            GPIO.output(self.H_OFF,GPIO.HIGH)
             
         # Set Boiler State
         if boiler_enabled:
-            GPIO.output(04,GPIO.LOW)
+            GPIO.output(self.B_OFF,GPIO.LOW)
         else:
-            GPIO.output(04,GPIO.HIGH)
+            GPIO.output(self.B_OFF,GPIO.HIGH)
             self.logger.info("Starting flashing boiler light")
 
             

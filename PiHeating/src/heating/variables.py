@@ -17,7 +17,6 @@ class Variables(object):
         or complete list if 'ALL' received
         """
         self.logger = logging.getLogger("main.variables.readVariables")
-        self.logger.info("reading variables")
         
         data = self.variableData()
         if variableName == 'ALL':

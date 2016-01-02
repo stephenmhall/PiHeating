@@ -9,7 +9,7 @@ test change
 '''
 from __future__ import division
 
-__updated__ = "2016-01-01"
+__updated__ = "2016-01-02"
 
 import logging
 from logging.handlers import RotatingFileHandler
@@ -68,7 +68,8 @@ class Main():
             
     def doLoop(self):
         checkInterval, boiler_enabled = Variables().readVariables(['Interval', 'BoilerEnabled'])
-        Max().checkHeat()
+        #Max().checkHeat()
+        MyGpio().buttonCheckHeat(0)
         if boiler_enabled != 1:
             checkInterval = checkInterval * 2
         if _platform == "linux" or _platform == "linux2":
