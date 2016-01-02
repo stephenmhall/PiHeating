@@ -23,8 +23,8 @@ class CreateUIPage():
         pageText = []
         pageText.append(self.pageTop())
         pageText.append(self.pageHeader('Main UI'))
-        pageText.append(self.roomTable(roomTemps))
         pageText.append(self.buttonLayout())
+        pageText.append(self.roomTable(roomTemps))
         pageText.append(self.weatherWidget())
         pageText.append(self.filler())
         pageText.append(self.page_bottom())
