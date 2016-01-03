@@ -65,7 +65,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             self.path="/index.html"
             time.sleep(1)
             if _platform == "linux" or _platform == "linux2":
-                MyGpio().buttonCheckHeat(1)
+                MyGpio().buttonCheckHeat("requesthandler")
             else:
                 Max().checkHeat()
             

@@ -9,7 +9,7 @@ test change
 '''
 from __future__ import division
 
-__updated__ = "2016-01-02"
+__updated__ = "2016-01-03"
 
 import logging
 from logging.handlers import RotatingFileHandler
@@ -22,6 +22,7 @@ from database import DbUtils
 from variables import Variables
 from sys import platform as _platform
 from os import system
+import hardware
 
 
 class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
@@ -54,7 +55,9 @@ class Main():
         except Exception, err:
             DbUtils().initialiseDB()
             self.logger.exception("Database Initialised %s" % err)
-
+        self.logger.info("Free Memory at Boot %s MB" % hardware.getRAM())
+        self.logger.info("CPU Usage at Boot %s" % hardware.getCPUUse())
+        
         self.startKioskServer()
         MyGpio().setupGPIO()
         self.doLoop()
@@ -69,6 +72,8 @@ class Main():
         if _platform == "linux" or _platform == "linux2":
             MyGpio().buttonCheckHeat(0)
             MyGpio().heartbeat(checkInterval)
+            self.logger.info("Memory free this loop %s MB" % hardware.getRAM())
+            self.logger.info("CPU Usage this loop %s" % hardware.getCPUUse())
             self.logger.debug( "loop interval : %s" %(checkInterval))
             self.doLoop()
         else:

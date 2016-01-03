@@ -238,10 +238,14 @@ class MyGpio(object):
     def heartbeat(self, beatTime):
         self.setStatusLights()
         if _platform == "linux" or _platform == "linux2":
-            self.logger.info("starting Heart Beat thread")
-            self.heartbeat_thread = HeartbeatThread(beatTime)
-            self.heartbeat_thread.start()
-            self.heartbeat_thread.join()
+            try:
+                self.logger.info("starting Heart Beat thread")
+                self.heartbeat_thread = HeartbeatThread(beatTime)
+                self.heartbeat_thread.daemon = True
+                self.heartbeat_thread.start()
+                self.heartbeat_thread.join()
+            except Exception, err:
+                self.logger.exception("Unable to start thread %s" % err)
         elif _platform == "win32":
             print 'heartbeat for :', beatTime
             
