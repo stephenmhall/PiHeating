@@ -19,8 +19,6 @@ import logging
 module_logger = logging.getLogger("main.requesthandler")
 
 
-
-#class MyRequestHandler(SimpleHTTPServer.SimpleHTTPRequestHandler):
 class MyRequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
@@ -32,18 +30,23 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             
         elif self.path[0:8] == '/ecomode':
             roomData = self.path
-            #print 'ecomode data : ', roomData
             SendMessage().updateRoom(roomData)
             self.path="/index.html"
             time.sleep(1)
-            Max().checkHeat()
+            if _platform == "linux" or _platform == "linux2":
+                MyGpio().buttonCheckHeat("requesthandler.ecomode")
+            else:
+                Max().checkHeat()
             
         elif self.path[0:9] == '/automode':
             roomData = self.path
             SendMessage().updateRoom(roomData)
             self.path="/index.html"
             time.sleep(1)
-            Max().checkHeat()
+            if _platform == "linux" or _platform == "linux2":
+                MyGpio().buttonCheckHeat("requesthandler.automode")
+            else:
+                Max().checkHeat()
             
         elif self.path[0:11] == '/rangegraph':
             print 'going to create rangeGraph page'
@@ -52,7 +55,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             
         elif self.path[0:10] == '/heatcheck':
             if _platform == "linux" or _platform == "linux2":
-                MyGpio().buttonCheckHeat(1)
+                MyGpio().buttonCheckHeat("requesthandler.heatcheck")
             else:
                 Max().checkHeat()
             self.path="/index.html"
@@ -65,7 +68,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             self.path="/index.html"
             time.sleep(1)
             if _platform == "linux" or _platform == "linux2":
-                MyGpio().buttonCheckHeat("requesthandler")
+                MyGpio().buttonCheckHeat("requesthandler.mode")
             else:
                 Max().checkHeat()
             
@@ -75,20 +78,20 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             self.path="/graph.html"
             
         elif self.path =="/?confirm=1&boilerswitch=Boiler+Enabled":
-            #roomTemps = CUI.createRooms()
             VAR.writeVariable([['BoilerEnabled', 0]])
             self.path = "/index.html"
-            #time.sleep(1)
-            #self.updateUIPages(roomTemps)
-            Max().checkHeat()
+            if _platform == "linux" or _platform == "linux2":
+                MyGpio().buttonCheckHeat("requesthandler.Boiler-disable")
+            else:
+                Max().checkHeat()
             
         elif self.path == '/?confirm=1&boilerswitch=Boiler+Disabled':
-            #roomTemps = CUI.createRooms()
             VAR.writeVariable([['BoilerEnabled', 1]])
             self.path = "/index.html"
-            #time.sleep(1)
-            #self.updateUIPages(roomTemps)
-            Max().checkHeat()
+            if _platform == "linux" or _platform == "linux2":
+                MyGpio().buttonCheckHeat("requesthandler.boiler-enable")
+            else:
+                Max().checkHeat()
             
         elif self.path =="/admin":
             roomTemps = CUI.createRooms()

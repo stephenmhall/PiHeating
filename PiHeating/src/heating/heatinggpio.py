@@ -104,8 +104,7 @@ class MyGpio(object):
             GPIO.setup(self.CHECKH,GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Check Heat
             GPIO.setup(self.SHUTDOWN,GPIO.IN, pull_up_down=GPIO.PUD_UP)  # 
             GPIO.setup(self.REBOOT,GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Reboot Raspberry Pi
-#             
-#             
+                  
             GPIO.add_event_detect(self.ON_OFF,GPIO.FALLING, callback=self.buttonDisableBoiler, bouncetime=500)# 05
             GPIO.add_event_detect(self.CHECKH,GPIO.FALLING, callback=self.buttonCheckHeat, bouncetime=500)    # 06
             GPIO.add_event_detect(self.SHUTDOWN,GPIO.FALLING, callback=self.buttonShutdown, bouncetime=500)     # 12
