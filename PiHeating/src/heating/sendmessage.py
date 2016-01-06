@@ -132,6 +132,7 @@ class SendMessage(object):
             
         if message != "":
             validData = True
+            self.logger.info("Sending message to MAX : %s" % sendString)
             s.send(sendString)
             message = ""
             try:

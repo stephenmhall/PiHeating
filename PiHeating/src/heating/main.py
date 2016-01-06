@@ -9,7 +9,7 @@ test change
 '''
 from __future__ import division
 
-__updated__ = "2016-01-03"
+__updated__ = "2016-01-04"
 
 import logging
 from logging.handlers import RotatingFileHandler
@@ -17,7 +17,7 @@ import threading
 from SocketServer import ThreadingMixIn
 from BaseHTTPServer import HTTPServer
 from requesthandler import MyRequestHandler
-from heatinggpio import MyGpio
+from heatinggpio import setupGPIO, buttonCheckHeat, hBeat
 from database import DbUtils
 from variables import Variables
 from sys import platform as _platform
@@ -59,7 +59,7 @@ class Main():
         self.logger.info("CPU Usage at Boot %s" % hardware.getCPUUse())
         
         self.startKioskServer()
-        MyGpio().setupGPIO()
+        setupGPIO()
         self.doLoop()
         
                
@@ -70,15 +70,17 @@ class Main():
         if boiler_enabled != 1:
             checkInterval = checkInterval * 2
         if _platform == "linux" or _platform == "linux2":
-            MyGpio().buttonCheckHeat(0)
-            MyGpio().heartbeat(checkInterval)
+            self.logger.info("checking heat levels")
+            buttonCheckHeat("main")
+            self.logger.info("starting heartbeat")
+            hBeat(checkInterval)
             self.logger.info("Memory free this loop %s MB" % hardware.getRAM())
             self.logger.info("CPU Usage this loop %s" % hardware.getCPUUse())
             self.logger.debug( "loop interval : %s" %(checkInterval))
             self.doLoop()
         else:
-            from max import Max
-            Max().checkHeat()
+            from max import checkHeat
+            checkHeat()
             threading.Timer(checkInterval, self.doLoop).start()
             self.logger.info('Running Windows timer')
     

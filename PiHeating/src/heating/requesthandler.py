@@ -8,8 +8,9 @@ from webui import CreateUIPage
 from graphing import MakeGraph
 from variables import Variables
 from sendmessage import SendMessage
-from max import Max
-from heatinggpio import MyGpio
+from max import checkHeat
+#from heatinggpio import MyGpio
+from heatinggpio import buttonCheckHeat, flashCube
 VAR = Variables()
 CUI = CreateUIPage()
 GRAPH = MakeGraph()
@@ -34,9 +35,9 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             self.path="/index.html"
             time.sleep(1)
             if _platform == "linux" or _platform == "linux2":
-                MyGpio().buttonCheckHeat("requesthandler.ecomode")
+                buttonCheckHeat("requesthandler.ecomode")
             else:
-                Max().checkHeat()
+                checkHeat()
             
         elif self.path[0:9] == '/automode':
             roomData = self.path
@@ -44,9 +45,9 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             self.path="/index.html"
             time.sleep(1)
             if _platform == "linux" or _platform == "linux2":
-                MyGpio().buttonCheckHeat("requesthandler.automode")
+                buttonCheckHeat("requesthandler.automode")
             else:
-                Max().checkHeat()
+                checkHeat()
             
         elif self.path[0:11] == '/rangegraph':
             print 'going to create rangeGraph page'
@@ -55,22 +56,22 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             
         elif self.path[0:10] == '/heatcheck':
             if _platform == "linux" or _platform == "linux2":
-                MyGpio().buttonCheckHeat("requesthandler.heatcheck")
+                buttonCheckHeat("requesthandler.heatcheck")
             else:
-                Max().checkHeat()
+                checkHeat()
             self.path="/index.html"
             
         elif self.path[0:5] == '/mode':
             roomData = self.path
             SendMessage().updateRoom(roomData)
             if _platform == "linux" or _platform == "linux2":
-                MyGpio().flashCube()
+                flashCube()
             self.path="/index.html"
             time.sleep(1)
             if _platform == "linux" or _platform == "linux2":
-                MyGpio().buttonCheckHeat("requesthandler.mode")
+                buttonCheckHeat("requesthandler.mode")
             else:
-                Max().checkHeat()
+                checkHeat()
             
         elif self.path[0:6] == '/graph':
             roomName = self.path
@@ -81,17 +82,17 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             VAR.writeVariable([['BoilerEnabled', 0]])
             self.path = "/index.html"
             if _platform == "linux" or _platform == "linux2":
-                MyGpio().buttonCheckHeat("requesthandler.Boiler-disable")
+                buttonCheckHeat("requesthandler.Boiler-disable")
             else:
-                Max().checkHeat()
+                checkHeat()
             
         elif self.path == '/?confirm=1&boilerswitch=Boiler+Disabled':
             VAR.writeVariable([['BoilerEnabled', 1]])
             self.path = "/index.html"
             if _platform == "linux" or _platform == "linux2":
-                MyGpio().buttonCheckHeat("requesthandler.boiler-enable")
+                buttonCheckHeat("requesthandler.boiler-enable")
             else:
-                Max().checkHeat()
+                checkHeat()
             
         elif self.path =="/admin":
             roomTemps = CUI.createRooms()
