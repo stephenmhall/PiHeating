@@ -36,8 +36,8 @@ def getData():
     logger = logging.getLogger("main.max.getData")
     validData = False
     message = ""
-    Max_IP, Max_Port = Variables().readVariables(['MaxIP', 'MaxPort'])
-    logger.info('Max Connection Starting on : %s %s ' % (Max_IP, Max_Port))
+    Max_IP, Max_IP2, Max_Port = Variables().readVariables(['MaxIP', 'maxIP2', 'MaxPort'])
+    logger.info('Max Connection Starting on : IP1-%s or IP2-%s on port %s ' % (Max_IP, Max_IP2, Max_Port))
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(1)
@@ -47,15 +47,19 @@ def getData():
         s.close()
         sys.exit()
          
-    #Connect to remote server
+    #Connect to Max Cube
     try:
         s.connect((Max_IP, int(Max_Port)))
         logger.info('Socket Connected to Max on ip %s' % Max_IP)
     except Exception, err:
-        s.close()
-        Variables().writeVariable([['CubeOK', 0]])
-        logger.exception("unable to make connection, trying later %s" % err)
-        CreateUIPage().updateWebUI()
+        try:
+            s.connect((Max_IP, int(Max_Port)))
+            logger.info('Socket Connected to Max on ip %s' % Max_IP)
+        except Exception, err:
+            s.close()
+            Variables().writeVariable([['CubeOK', 0]])
+            logger.exception("unable to make connection, trying later %s" % err)
+            CreateUIPage().updateWebUI()
         return (message, validData)
      
     try:
