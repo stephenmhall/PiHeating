@@ -488,7 +488,11 @@ class CreateUIPage():
             heating_state = 0
         duty_cycle = DB.getCubes()[3]
 
-        boiler_state, cube_state, vera_state, baseFontSize = VAR.readVariables(['BoilerEnabled', 'CubeOK', 'VeraOK', 'BaseFontSize'])
+        boiler_state, cube_state, active_cube, vera_state, baseFontSize = VAR.readVariables(['BoilerEnabled',
+                                                                                             'CubeOK',
+                                                                                             'ActiveCube',
+                                                                                             'VeraOK',
+                                                                                             'BaseFontSize'])
         heating_cycle = self.dutyCycle()
 
         
@@ -503,9 +507,9 @@ class CreateUIPage():
             heatIsOn = 'btn-info btn-md" style="font-size: {}vw;">Heating is OFF '.format(baseFontSize - buttonSize)
             
         if cube_state:
-            cubeIsOn = 'btn-success btn-md" style="font-size: {}vw;">Cube '.format(baseFontSize - buttonSize)
+            cubeIsOn = 'btn-success btn-md" style="font-size: {}vw;">Cube{} '.format(baseFontSize - buttonSize, active_cube)
         else:
-            cubeIsOn = 'btn-warning btn-md" style="font-size: {}vw;">Cube '.format(baseFontSize - buttonSize)
+            cubeIsOn = 'btn-warning btn-md" style="font-size: {}vw;">Cube{} '.format(baseFontSize - buttonSize, active_cube)
             
         if vera_state:
             veraIsOn = 'btn-success btn-md" style="font-size: {}vw;">Vera'.format(baseFontSize - buttonSize)

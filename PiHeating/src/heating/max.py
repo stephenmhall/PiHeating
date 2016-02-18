@@ -50,17 +50,19 @@ def getData():
     #Connect to Max Cube
     try:
         s.connect((Max_IP, int(Max_Port)))
-        logger.info('Socket Connected to Max on ip %s' % Max_IP)
+        logger.info('Socket Connected to Max1 on ip %s' % Max_IP)
+        Variables().writeVariable([['ActiveCube', 1]])
     except Exception, err:
         try:
-            s.connect((Max_IP, int(Max_Port)))
-            logger.info('Socket Connected to Max on ip %s' % Max_IP)
+            s.connect((Max_IP2, int(Max_Port)))
+            logger.info('Socket Connected to Max2 on ip %s' % Max_IP)
+            Variables().writeVariable([['ActiveCube', 2]])
         except Exception, err:
             s.close()
             Variables().writeVariable([['CubeOK', 0]])
             logger.exception("unable to make connection, trying later %s" % err)
             CreateUIPage().updateWebUI()
-        return (message, validData)
+            return (message, validData)
      
     try:
         while 1:

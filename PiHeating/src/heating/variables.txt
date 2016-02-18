@@ -14,6 +14,7 @@ VeraTemp,1
 BoilerEnabled,1
 Interval,135
 CubeOK,1
+ActiveCube,1
 VeraOK,1
 PrintData,0
 PageRefresh,67
