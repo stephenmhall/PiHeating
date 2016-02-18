@@ -244,8 +244,29 @@ def maxCmd_L(line):
 def getCurrentOutsidetemp():
     """
     Get Current outside temperature from OpenWeatherMap using the API
+    
+    http://192.168.0.13:3480/data_request?id=variableget&DeviceNum=112&serviceId=urn:upnp-org:serviceId:TemperatureSensor1&Variable=CurrentTemperature
     """
     logger = logging.getLogger("main.max.getCurrentOutsidetemp")
+#     Vera_Address, Vera_Port, VeraGetData, VeraOutsideTempID, VeraOutsideTempService, VeraTemp = Variables().readVariables(['VeraIP', 
+#                                        'VeraPort', 
+#                                        'VeraGetData',
+#                                        'VeraOutsideTempID',
+#                                        'VeraOutsideTempService',
+#                                        'VeraTemp'])
+#     if VeraTemp:
+#         try:
+#             f = urllib2.urlopen(VeraGetData.format(Vera_Address, Vera_Port, 
+#                                                 VeraOutsideTempID,
+#                                                 VeraOutsideTempService,
+#                                                 'CurrentTemperature'))
+#             temp_c = f.read()
+#             logger.info('Vera Outside Temperature is %s' %temp_c)
+#             return temp_c
+#         
+#         except Exception, err:
+#             logger.exception("No Vera temp data %s" % err)
+    
     try:
         cityID, userKey = Variables().readVariables(['WeatherCityID', 'WeatherKey'])
         f = urllib2.urlopen('http://api.openweathermap.org/data/2.5/weather?id={}&APPID={}'.format(cityID,userKey))

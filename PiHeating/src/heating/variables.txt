@@ -1,4 +1,4 @@
-WebIP,192.168.0.22
+WebIP,192.168.0.41
 WebPort,4102
 MaxIP,192.168.0.36
 MaxPort,62910
@@ -6,6 +6,10 @@ VeraIP,192.168.0.13
 VeraPort,3480
 VeraDevice,92
 VeraControl,http://{}:{}/data_request?id=lu_action&output_format=xml&DeviceNum={}&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue={}
+VeraGetData,http://{}:{}/data_request?id=variableget&DeviceNum={}&serviceId={}&Variable={}
+VeraOutsideTempID,112
+VeraOutsideTempService,urn:upnp-org:serviceId:TemperatureSensor1
+VeraTemp,1
 BoilerEnabled,1
 Interval,135
 CubeOK,1
