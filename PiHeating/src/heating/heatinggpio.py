@@ -12,18 +12,20 @@ import time
 
 module_logger = logging.getLogger("main.heatinggpio")
 
-B_OFF = 04
-H_ON  = 17
-H_OFF = 18
-C_OK  = 22
-C_ERR = 23
-V_OK  = 24
-V_ERR = 25
-HBEAT = 27
-ON_OFF = 05
-CHECKH = 06
-SHUTDOWN = 12
-REBOOT   = 13
+B_OFF = 04  # Boiler off LED
+H_ON  = 17  # Heat On LED
+H_OFF = 18  # Heat Off LED
+C_OK  = 22  # Cube OK LED
+C_ERR = 23  # Cube Error LED
+V_OK  = 24  # Vera Ok LED
+V_ERR = 25  # Vera Error LED
+HBEAT = 27  # HEARTBEAT LED
+ON_OFF = 05 # Boiler ON/Off button
+CHECKH = 06 # Manual Valve check button
+SHUTDOWN = 12   # Shutdown RPi button
+REBOOT   = 13   # Reboot RPi button
+BOILER_SW= 21   # Boiler relay switch output
+
 
 # class HeartbeatThread(threading.Thread):
 #     
@@ -174,6 +176,7 @@ def setupGPIO():
         GPIO.setup(V_OK,GPIO.OUT) # Vera Ok
         GPIO.setup(V_ERR,GPIO.OUT) # Vera Error
         GPIO.setup(HBEAT,GPIO.OUT) # Heart beat
+        GPIO.setup(BOILER_SW,GPIO.OUT) # Boiler Switch
         GPIO.setup(ON_OFF,GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Disable Heat Button
         GPIO.setup(CHECKH,GPIO.IN, pull_up_down=GPIO.PUD_UP)  # Check Heat
         GPIO.setup(SHUTDOWN,GPIO.IN, pull_up_down=GPIO.PUD_UP)  # 
@@ -307,8 +310,9 @@ def flashLedThread(channel, flashTime, frequencie, brightness):
     time.sleep(flashTime)
     ledFlash.stop()
     
-
-
+def switchHeating(status):
+    module_logger.info('Manual Heating switch, status %s' % status)
+    GPIO.output(H_ON,GPIO.status)
         
 def setStatusLights():
     cube_state, vera_state, boiler_enabled = Variables().readVariables(['CubeOK', 'VeraOK', 'BoilerEnabled'])

@@ -3,6 +3,7 @@ import logging
 from database import DbUtils
 from variables import Variables
 from webui import CreateUIPage
+from heatinggpio import switchHeating
 import base64
 import socket
 import datetime
@@ -36,27 +37,50 @@ def getData():
     logger = logging.getLogger("main.max.getData")
     validData = False
     message = ""
-    Max_IP, Max_IP2, Max_Port = Variables().readVariables(['MaxIP', 'maxIP2', 'MaxPort'])
+    Max_IP, Max_IP2, Max_Port = Variables().readVariables(['MaxIP', 'MaxIP2', 'MaxPort'])
     logger.info('Max Connection Starting on : IP1-%s or IP2-%s on port %s ' % (Max_IP, Max_IP2, Max_Port))
     try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(1)
-        logger.info('Socket Created')
-    except socket.error:
-        logger.exception("unable to create socket")
-        s.close()
-        sys.exit()
-         
-    #Connect to Max Cube
-    try:
-        s.connect((Max_IP, int(Max_Port)))
-        logger.info('Socket Connected to Max1 on ip %s' % Max_IP)
-        Variables().writeVariable([['ActiveCube', 1]])
+        #Cube 1
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(1)
+            logger.info('Socket Created')
+        except socket.error:
+            logger.exception("unable to create socket")
+            s.close()
+            sys.exit()
+             
+        #Connect to Max Cube1
+        try:
+            s.connect((Max_IP, int(Max_Port)))
+            logger.info('Socket Connected to Max1 on ip %s' % Max_IP)
+            Variables().writeVariable([['ActiveCube', 1]])
+            Variables().writeVariable([['CubeOK', 1]])
+        except Exception, err:
+            s.close()
+            Variables().writeVariable([['CubeOK', 0]])
+            logger.exception("unable to make connection, trying later %s" % err)
+            #CreateUIPage().updateWebUI()
+            #return (message, validData)
+            raise Exception("Cube 1 fail")
     except Exception, err:
+        logger.exception("unable to make connection to Cube 1, trying Cube2 %s" % err)
+        #Cube 2
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(1)
+            logger.info('Socket Created')
+        except socket.error:
+            logger.exception("unable to create socket")
+            s.close()
+            sys.exit()
+             
+        #Connect to Max Cube2
         try:
             s.connect((Max_IP2, int(Max_Port)))
-            logger.info('Socket Connected to Max2 on ip %s' % Max_IP)
+            logger.info('Socket Connected to Max2 on ip %s' % Max_IP2)
             Variables().writeVariable([['ActiveCube', 2]])
+            Variables().writeVariable([['CubeOK', 1]])
         except Exception, err:
             s.close()
             Variables().writeVariable([['CubeOK', 0]])
@@ -77,7 +101,8 @@ def getData():
         
     s.close()
     logger.debug(message)
-    return (message, validData) 
+    return (message, validData)
+
 
 def parseData(message):
     print_on = int(Variables().readVariables(['PrintData']))
@@ -252,6 +277,7 @@ def getCurrentOutsidetemp():
     Get Current outside temperature from OpenWeatherMap using the API
     
     http://192.168.0.13:3480/data_request?id=variableget&DeviceNum=112&serviceId=urn:upnp-org:serviceId:TemperatureSensor1&Variable=CurrentTemperature
+    http://192.168.0.13:3480/data_request?id=variableset&DeviceNum=103&serviceId=urn:upnp-org:serviceId:TemperatureSensor1&Variable=CurrentTemperature&Value=13.4
     """
     logger = logging.getLogger("main.max.getCurrentOutsidetemp")
     Vera_Address, Vera_Port, VeraGetData, VeraOutsideTempID, VeraOutsideTempService, VeraTemp = Variables().readVariables(['VeraIP', 
@@ -291,7 +317,7 @@ def switchHeat():
     logTime = time.time()
     boilerEnabled, veraControl, Vera_Address, Vera_Port, \
     Vera_Device, singleRadThreshold, multiRadThreshold, \
-    multiRadCount, AllValveTotal = Variables().readVariables(['BoilerEnabled', 
+    multiRadCount, AllValveTotal, ManualHeatingSwitch = Variables().readVariables(['BoilerEnabled', 
                                        'VeraControl', 
                                        'VeraIP', 
                                        'VeraPort', 
@@ -299,7 +325,8 @@ def switchHeat():
                                        'SingleRadThreshold',
                                        'MultiRadThreshold',
                                        'MultiRadCount',
-                                       'AllValveTotal'])
+                                       'AllValveTotal',
+                                       'ManualHeatingSwitch'])
     
     roomTemps = CreateUIPage().createRooms()
     outsideTemp = getCurrentOutsidetemp()
@@ -329,6 +356,11 @@ def switchHeat():
         try:
             _ = requests.get(veraControl.format(Vera_Address, Vera_Port, 
                                                 Vera_Device, str(boilerState)), timeout=5)
+            
+            # Set Manual Boiler Switch if enabled
+            if ManualHeatingSwitch:
+                switchHeating(boilerState)
+            
             Variables().writeVariable([['VeraOK', 1]])
             print 'message sent to Vera'
         except:
@@ -339,6 +371,11 @@ def switchHeat():
         try:
             _ = requests.get(veraControl.format(Vera_Address, Vera_Port, 
                                                 Vera_Device, boilerState), timeout=5)
+            
+            # Set Manual Boiler Switch if enabled
+            if ManualHeatingSwitch:
+                switchHeating(boilerState)
+            
             Variables().writeVariable([['VeraOK', 1]])
             print "Boiler is Disabled"
         except:

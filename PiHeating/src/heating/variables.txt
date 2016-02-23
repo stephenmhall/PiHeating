@@ -26,3 +26,4 @@ WeatherKey,713951e4ce665b2d2d5d1b7a10b88f63
 WeatherCityID,6640068
 BaseFontSize,3
 LoggingLevel,INFO
+ManualHeatingSwitch,1
