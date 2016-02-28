@@ -1,0 +1,53 @@
+From raspberry jessie full image
+
+from command line or putty session
+
+sudo raspi-config
+	expand file system
+	change user password
+	advanced
+		enable I2C
+finish
+reboot
+
+sudo apt-get update
+sudo apt-get upgrade
+
+start WinSCP
+connect to RPi
+	in /home/pi create folder heating
+	in /home/pi create folder logs
+	from source folder copy all files into heating folder
+	edit variables.txt file
+		change WebIP to be same as RPi IP
+		change MaxIP to be same as Max cube
+		change WeatherKey to own key from openweathermap site
+		change WeatherCityID to own city
+		If using local relay change ManualHeatingSwitch to 1
+	If heating.db file exists please delete. It should be created on first run, do not delete again.
+	
+start putty session from WinSCP
+	
+sudo apt-get install python-dev
+pip install psutil
+
+cd to heating folder
+	sudo python main.py
+	hopefully it runs ok usually there are a few errors first run stop it and start again
+	CTRL +C to stop
+	there should now be a new database file and some log files
+	sudo python main.py
+	on your PC you should be able to load web UI at http://RPi-IP:4102
+	
+	
+Make it run automatically
+	sudo crontab -e (may as for type of editor choose 2 nano)
+	copy the lines from the crontab instructions
+	move to the bottom of the editor window with arrow keys
+	when on an empty line right click mouse to paste lines
+	check the file structure is the same as yours
+	press CTRL X to save
+	reboot to test
+		sudo reboot
+
+	

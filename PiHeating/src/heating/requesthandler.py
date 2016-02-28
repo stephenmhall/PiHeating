@@ -8,7 +8,7 @@ from webui import CreateUIPage
 from graphing import MakeGraph
 from variables import Variables
 from sendmessage import SendMessage
-from max import checkHeat
+#from max import checkHeat
 #from heatinggpio import MyGpio
 from heatinggpio import buttonCheckHeat, flashCube
 VAR = Variables()
@@ -34,20 +34,20 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             SendMessage().updateRoom(roomData)
             self.path="/index.html"
             time.sleep(1)
-            if _platform == "linux" or _platform == "linux2":
-                buttonCheckHeat("requesthandler.ecomode")
-            else:
-                checkHeat()
+            #if _platform == "linux" or _platform == "linux2":
+            buttonCheckHeat("requesthandler.ecomode")
+            #else:
+            #   checkHeat()
             
         elif self.path[0:9] == '/automode':
             roomData = self.path
             SendMessage().updateRoom(roomData)
             self.path="/index.html"
             time.sleep(1)
-            if _platform == "linux" or _platform == "linux2":
-                buttonCheckHeat("requesthandler.automode")
-            else:
-                checkHeat()
+            #if _platform == "linux" or _platform == "linux2":
+            buttonCheckHeat("requesthandler.automode")
+            #else:
+            #    checkHeat()
             
         elif self.path[0:11] == '/rangegraph':
             print 'going to create rangeGraph page'
@@ -55,10 +55,10 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             time.sleep(1)
             
         elif self.path[0:10] == '/heatcheck':
-            if _platform == "linux" or _platform == "linux2":
-                buttonCheckHeat("requesthandler.heatcheck")
-            else:
-                checkHeat()
+            #if _platform == "linux" or _platform == "linux2":
+            buttonCheckHeat("requesthandler.heatcheck")
+            #else:
+            #    checkHeat()
             self.path="/index.html"
             
         elif self.path[0:5] == '/mode':
@@ -68,10 +68,10 @@ class MyRequestHandler(BaseHTTPRequestHandler):
                 flashCube()
             self.path="/index.html"
             time.sleep(1)
-            if _platform == "linux" or _platform == "linux2":
-                buttonCheckHeat("requesthandler.mode")
-            else:
-                checkHeat()
+            #if _platform == "linux" or _platform == "linux2":
+            buttonCheckHeat("requesthandler.mode")
+            #else:
+            #    checkHeat()
             
         elif self.path[0:6] == '/graph':
             roomName = self.path
@@ -81,18 +81,18 @@ class MyRequestHandler(BaseHTTPRequestHandler):
         elif self.path =="/?confirm=1&boilerswitch=Boiler+Enabled":
             VAR.writeVariable([['BoilerEnabled', 0]])
             self.path = "/index.html"
-            if _platform == "linux" or _platform == "linux2":
-                buttonCheckHeat("requesthandler.Boiler-disable")
-            else:
-                checkHeat()
+            #if _platform == "linux" or _platform == "linux2":
+            buttonCheckHeat("requesthandler.Boiler-disable")
+            #else:
+            #    checkHeat()
             
         elif self.path == '/?confirm=1&boilerswitch=Boiler+Disabled':
             VAR.writeVariable([['BoilerEnabled', 1]])
             self.path = "/index.html"
-            if _platform == "linux" or _platform == "linux2":
-                buttonCheckHeat("requesthandler.boiler-enable")
-            else:
-                checkHeat()
+            #if _platform == "linux" or _platform == "linux2":
+            buttonCheckHeat("requesthandler.boiler-enable")
+            #else:
+            #    checkHeat()
             
         elif self.path =="/admin":
             roomTemps = CUI.createRooms()

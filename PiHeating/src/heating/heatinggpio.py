@@ -12,67 +12,19 @@ import time
 
 module_logger = logging.getLogger("main.heatinggpio")
 
-B_OFF = 04  # Boiler off LED
-H_ON  = 17  # Heat On LED
-H_OFF = 18  # Heat Off LED
-C_OK  = 22  # Cube OK LED
-C_ERR = 23  # Cube Error LED
-V_OK  = 24  # Vera Ok LED
-V_ERR = 25  # Vera Error LED
-HBEAT = 27  # HEARTBEAT LED
-ON_OFF = 05 # Boiler ON/Off button
-CHECKH = 06 # Manual Valve check button
+B_OFF = 04      # Boiler off LED
+H_ON  = 17      # Heat On LED
+H_OFF = 18      # Heat Off LED
+C_OK  = 22      # Cube OK LED
+C_ERR = 23      # Cube Error LED
+V_OK  = 24      # Vera Ok LED
+V_ERR = 25      # Vera Error LED
+HBEAT = 27      # HEARTBEAT LED
+ON_OFF = 05     # Boiler ON/Off button
+CHECKH = 06     # Manual Valve check button
 SHUTDOWN = 12   # Shutdown RPi button
 REBOOT   = 13   # Reboot RPi button
 BOILER_SW= 21   # Boiler relay switch output
-
-
-# class HeartbeatThread(threading.Thread):
-#     
-#     def __init__(self, beat_time):
-#         super(HeartbeatThread, self).__init__()
-#         self.beat_time = beat_time
-#         self._stop = threading.Event()
-#         self.logger = logging.getLogger("main.heatinggpio.heartbeatthread")
-#         
-#     def stop(self):
-#         self._stop.set()
-#         print 'setting heartbeat stop event to YES'
-#         
-#     def stopped(self):
-#         return 'Thread stop condition : ',self._stop.is_set()
-#     
-#     def run(self):
-#         self.logger.info("starting heart beat for %s" % self.beat_time)
-#         # Set Cube Lights
-#         heart = GPIO.PWM(27, 100)
-#         pause_time = 0.02
-#         startTime = time.time()
-#         endTime = startTime + self.beat_time
-#         heart.start(0)
-#         while startTime < endTime:
-#             for i in range(0,101):      # 101 because it stops when it finishes 100  
-#                 heart.ChangeDutyCycle(i)  
-#                 time.sleep(pause_time)  
-#             for i in range(100,-1,-1):      # from 100 to zero in steps of -1  
-#                 heart.ChangeDutyCycle(i)  
-#                 time.sleep(pause_time)
-#             startTime = time.time()
-#             if self._stop.is_set():
-#                 self.logger.info("heartbeat stop event is YES")
-#                 break
-#         
-#         self.logger.debug("stopping heartbeat thread")
-#         heart.stop()
-#         GPIO.output(04,GPIO.LOW)
-#         GPIO.output(17,GPIO.LOW)
-#         GPIO.output(18,GPIO.LOW)
-#         GPIO.output(22,GPIO.LOW)
-#         GPIO.output(23,GPIO.LOW)
-#         GPIO.output(24,GPIO.LOW)
-#         GPIO.output(25,GPIO.LOW)
-#         GPIO.output(27,GPIO.LOW)
-#         return
 
 
 class HeartbeatThread(object):
@@ -145,19 +97,6 @@ def hBeat(beat_time):
     GPIO.output(27,GPIO.LOW)
     module_logger.debug("heartbeat ended")
     
-# def heartbeat(beatTime):
-#     setStatusLights()
-#     if _platform == "linux" or _platform == "linux2":
-#         try:
-#             module_logger.info("starting Heart Beat thread")
-#             heartbeat_thread = HeartbeatThread(beatTime)
-#             heartbeat_thread.daemon = True
-#             heartbeat_thread.start()
-#             heartbeat_thread.join()
-#         except Exception, err:
-#             module_logger.exception("Unable to start thread %s" % err)
-#     elif _platform == "win32":
-#         print 'heartbeat for :', beatTime
 
 def setupGPIO():
     '''
@@ -216,7 +155,6 @@ def buttonCheckHeat(channel):
     GPIO.output(V_OK,GPIO.LOW)
     GPIO.output(V_ERR,GPIO.LOW)
 
-    
     for _ in range(4):
         sleepTime = 0.1
         GPIO.output(H_ON,GPIO.HIGH)
@@ -310,17 +248,17 @@ def flashLedThread(channel, flashTime, frequencie, brightness):
     time.sleep(flashTime)
     ledFlash.stop()
     
-def switchHeating(status):
-    module_logger.info('Manual Heating switch, status %s' % status)
-    if status == 1:
-        GPIO.output(BOILER_SW,GPIO.LOW) # Pull down Relay to switch on.
-    elif status == 0:
-        GPIO.output(BOILER_SW,GPIO.HIGH)
+# def relayHeating(status):
+#     module_logger.info('Manual Heating switch, status %s' % status)
+#     if status == 1:
+#         GPIO.output(BOILER_SW,GPIO.LOW) # Pull down Relay to switch on.
+#     elif status == 0:
+#         GPIO.output(BOILER_SW,GPIO.HIGH)
         
 def setStatusLights():
-    cube_state, vera_state, boiler_enabled = Variables().readVariables(['CubeOK', 'VeraOK', 'BoilerEnabled'])
+    cube_state, vera_state, boiler_enabled, local_relay = Variables().readVariables(['CubeOK', 'VeraOK', 'BoilerEnabled', 'ManualHeatingSwitch'])
     heating_state = DbUtils().getBoiler()[2]
-    module_logger.debug("setting status lights")
+    module_logger.info("setting status lights")
     if cube_state:
         GPIO.output(C_OK,GPIO.HIGH)
         GPIO.output(C_ERR,GPIO.LOW)
@@ -340,9 +278,15 @@ def setStatusLights():
     if heating_state:
         GPIO.output(H_ON,GPIO.HIGH)
         GPIO.output(H_OFF,GPIO.LOW)
+        if local_relay:
+            module_logger.info("Switching local relay")
+            GPIO.output(BOILER_SW,GPIO.LOW) # Pull down Relay to switch on.
     else:
         GPIO.output(H_ON,GPIO.LOW)
         GPIO.output(H_OFF,GPIO.HIGH)
+        if local_relay:
+            module_logger.info("Switching local relay")
+            GPIO.output(BOILER_SW,GPIO.HIGH)
         
     # Set Boiler State
     if boiler_enabled:
