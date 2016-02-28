@@ -312,7 +312,10 @@ def flashLedThread(channel, flashTime, frequencie, brightness):
     
 def switchHeating(status):
     module_logger.info('Manual Heating switch, status %s' % status)
-    GPIO.output(H_ON,GPIO.status)
+    if status == 1:
+        GPIO.output(BOILER_SW,GPIO.LOW) # Pull down Relay to switch on.
+    elif status == 0:
+        GPIO.output(BOILER_SW,GPIO.HIGH)
         
 def setStatusLights():
     cube_state, vera_state, boiler_enabled = Variables().readVariables(['CubeOK', 'VeraOK', 'BoilerEnabled'])

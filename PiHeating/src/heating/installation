@@ -1,0 +1,13 @@
+From raspberry jessie full image
+
+sudo raspi-config
+	expand file system
+	change user password
+	advanced
+		enable I2C
+finish
+reboot
+
+sudo apt-get update
+sudo apt-get upgrade
+
