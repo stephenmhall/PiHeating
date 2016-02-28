@@ -23,6 +23,7 @@ connect to RPi
 		change MaxIP to be same as Max cube
 		change WeatherKey to own key from openweathermap site
 		change WeatherCityID to own city
+		change WeatherWidget to your location
 		If using local relay change ManualHeatingSwitch to 1
 	If heating.db file exists please delete. It should be created on first run, do not delete again.
 	
