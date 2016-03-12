@@ -9,11 +9,13 @@ test change
 '''
 from __future__ import division
 
-__updated__ = "2016-01-04"
+__updated__ = "2016-03-12"
 
 import logging
 from logging.handlers import RotatingFileHandler
 import threading
+import multiprocessing
+import neopixelserial
 from SocketServer import ThreadingMixIn
 from BaseHTTPServer import HTTPServer
 from requesthandler import MyRequestHandler
@@ -23,6 +25,10 @@ from variables import Variables
 from sys import platform as _platform
 from os import system
 import hardware
+
+input_queue = multiprocessing.Queue()
+output_queue = multiprocessing.Queue()
+
 
 
 class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
@@ -34,6 +40,7 @@ class Main():
         #Initialise the Logger
         
         logLevel = Variables().readVariables(['LoggingLevel']).rstrip('\r')
+        useNeoPixel = Variables().readVariables(['UseNeoPixel'])
         self.logger = logging.getLogger("main")
         level = logging.getLevelName(logLevel)
         self.logger.setLevel(level)
@@ -58,8 +65,19 @@ class Main():
         self.logger.info("Free Memory at Boot %s MB" % hardware.getRAM())
         self.logger.info("CPU Usage at Boot %s" % hardware.getCPUUse())
         
+        # Start Serial connection worker if using NeoPixel
+        if useNeoPixel:
+            arduino = neopixelserial.SerialProcess(input_queue, output_queue)
+            arduino.daemon = True
+            arduino.start()
+        # Or start the GPIO
+        else:
+            setupGPIO()
+        
+        # Start Web UI
         self.startKioskServer()
-        setupGPIO()
+        
+        # Start Main Loop
         self.doLoop()
         
                

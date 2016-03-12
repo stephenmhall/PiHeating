@@ -21,3 +21,16 @@ REBOOT   = 13   # Reboot RPi button
 Relay output driver
 
 BOILER_SW= 21   # Boiler relay switch output
+
+NeoPixel 	PMW Pin 18
+
+For Serial NeoPixel Version
+
+pin	use
+1	3.3V Arduino Supply
+2	5V NeoPixel supply
+6	GND
+8	GPIO14 (UART_TXD)
+10	GPIO15 (UART_RXD)
+
+			

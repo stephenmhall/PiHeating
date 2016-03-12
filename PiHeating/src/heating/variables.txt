@@ -28,3 +28,4 @@ WeatherWidget,http://forecast.io/embed/#lat=57.155689&lon=-2.295520&name=Kier Ci
 BaseFontSize,3
 LoggingLevel,INFO
 ManualHeatingSwitch,1
+UseNeoPixel,0

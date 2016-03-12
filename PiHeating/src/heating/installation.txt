@@ -7,11 +7,19 @@ sudo raspi-config
 	change user password
 	advanced
 		enable I2C
+		disable serial boot console
+		
 finish
 reboot
 
 sudo apt-get update
 sudo apt-get upgrade
+sudo rpi-update
+
+Enable Serial ttyAMA0 to GPIO14/15 on RPi3 if using the NeoPixel light ring.
+	disable bluetooth
+		sudo systemctl disable hciuart
+	add dtoverlay=pi3-miniuart-bt to /boot/config.txt file
 
 start WinSCP
 connect to RPi
