@@ -29,3 +29,4 @@ BaseFontSize,3
 LoggingLevel,INFO
 ManualHeatingSwitch,1
 UseNeoPixel,0
+BoilerOverride,2

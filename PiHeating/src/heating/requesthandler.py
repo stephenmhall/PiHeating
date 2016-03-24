@@ -11,6 +11,7 @@ from sendmessage import SendMessage
 #from max import checkHeat
 #from heatinggpio import MyGpio
 from heatinggpio import buttonCheckHeat, flashCube
+from max import MaxInterface
 VAR = Variables()
 CUI = CreateUIPage()
 GRAPH = MakeGraph()
@@ -21,8 +22,15 @@ module_logger = logging.getLogger("main.requesthandler")
 
 
 class MyRequestHandler(BaseHTTPRequestHandler):
+    
+    def __init__(self, request, client_address, server):
+        self.input_queue = server.queue
+        BaseHTTPRequestHandler.__init__(self, request, client_address, server)
+        
+        
 
     def do_GET(self):
+        useNeoPixel = VAR.readVariables(['UseNeoPixel'])
         module_logger.debug("GET %s" % self.path)
         if self.path=="/":
             roomTemps = CUI.createRooms()
@@ -34,31 +42,31 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             SendMessage().updateRoom(roomData)
             self.path="/index.html"
             time.sleep(1)
-            #if _platform == "linux" or _platform == "linux2":
-            buttonCheckHeat("requesthandler.ecomode")
-            #else:
-            #   checkHeat()
+            if useNeoPixel:
+                MaxInterface().checkHeat()
+            else:
+                buttonCheckHeat("requesthandler.ecomode")
             
         elif self.path[0:9] == '/automode':
             roomData = self.path
             SendMessage().updateRoom(roomData)
             self.path="/index.html"
             time.sleep(1)
-            #if _platform == "linux" or _platform == "linux2":
-            buttonCheckHeat("requesthandler.automode")
-            #else:
-            #    checkHeat()
-            
+            if useNeoPixel:
+                MaxInterface().checkHeat()
+            else:
+                buttonCheckHeat("requesthandler.automode")
+
         elif self.path[0:11] == '/rangegraph':
             print 'going to create rangeGraph page'
             CUI.rangeGraphUI()
             time.sleep(1)
             
         elif self.path[0:10] == '/heatcheck':
-            #if _platform == "linux" or _platform == "linux2":
-            buttonCheckHeat("requesthandler.heatcheck")
-            #else:
-            #    checkHeat()
+            if useNeoPixel:
+                MaxInterface().checkHeat(self.input_queue)
+            else:
+                buttonCheckHeat("requesthandler.heatcheck")
             self.path="/index.html"
             
         elif self.path[0:5] == '/mode':
@@ -68,10 +76,10 @@ class MyRequestHandler(BaseHTTPRequestHandler):
                 flashCube()
             self.path="/index.html"
             time.sleep(1)
-            #if _platform == "linux" or _platform == "linux2":
-            buttonCheckHeat("requesthandler.mode")
-            #else:
-            #    checkHeat()
+            if useNeoPixel:
+                MaxInterface().checkHeat()
+            else:
+                buttonCheckHeat("requesthandler.mode")
             
         elif self.path[0:6] == '/graph':
             roomName = self.path
@@ -81,18 +89,18 @@ class MyRequestHandler(BaseHTTPRequestHandler):
         elif self.path =="/?confirm=1&boilerswitch=Boiler+Enabled":
             VAR.writeVariable([['BoilerEnabled', 0]])
             self.path = "/index.html"
-            #if _platform == "linux" or _platform == "linux2":
-            buttonCheckHeat("requesthandler.Boiler-disable")
-            #else:
-            #    checkHeat()
+            if useNeoPixel:
+                MaxInterface().checkHeat()
+            else:
+                buttonCheckHeat("requesthandler.Boiler-disable")
             
         elif self.path == '/?confirm=1&boilerswitch=Boiler+Disabled':
             VAR.writeVariable([['BoilerEnabled', 1]])
             self.path = "/index.html"
-            #if _platform == "linux" or _platform == "linux2":
-            buttonCheckHeat("requesthandler.boiler-enable")
-            #else:
-            #    checkHeat()
+            if useNeoPixel:
+                MaxInterface().checkHeat()
+            else:
+                buttonCheckHeat("requesthandler.boiler-enable")
             
         elif self.path =="/admin":
             roomTemps = CUI.createRooms()
