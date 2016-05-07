@@ -14,6 +14,7 @@ import requests
 
 import multiprocessing
 import neopixelserial
+from time import sleep
 
 maxDetails = {}
 rooms = {}
@@ -90,6 +91,88 @@ class MaxInterface():
             return data
             
 
+#     def getData(self):
+#         logger = logging.getLogger("main.max.getData")
+#         validData = False
+#         message = ""
+#         Max_IP, Max_IP2, Max_Port = Variables().readVariables(['MaxIP', 'MaxIP2', 'MaxPort'])
+#         logger.info('Max Connection Starting on : IP1-%s or IP2-%s on port %s ' % (Max_IP, Max_IP2, Max_Port))
+#         try:
+#             #Cube 1
+#             try:
+#                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#                 s.settimeout(1)
+#                 logger.info('Socket Created')
+#             except socket.error:
+#                 logger.exception("unable to create socket")
+#                 s.close()
+#                 sys.exit()
+#                  
+#             #Connect to Max Cube1
+#             try:
+#                 s.connect((Max_IP, int(Max_Port)))
+#                 logger.info('Socket Connected to Max1 on ip %s' % Max_IP)
+#                 Variables().writeVariable([['ActiveCube', 1]])
+#                 Variables().writeVariable([['CubeOK', 1]])
+#             except Exception, err:
+#                 s.close()
+#                 Variables().writeVariable([['CubeOK', 0]])
+#                 logger.exception("unable to make connection, trying later %s" % err)
+#                 #CreateUIPage().updateWebUI()
+#                 #return (message, validData)
+#                 raise Exception("Cube 1 fail")
+#         except Exception, err:
+#             logger.exception("unable to make connection to Cube 1, trying Cube2 %s" % err)
+#             #Cube 2
+#             try:
+#                 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#                 s.settimeout(1)
+#                 logger.info('Socket Created')
+#             except socket.error:
+#                 logger.exception("unable to create socket")
+#                 s.close()
+#                 sys.exit()
+#                  
+#             #Connect to Max Cube2
+#             try:
+#                 s.connect((Max_IP2, int(Max_Port)))
+#                 logger.info('Socket Connected to Max2 on ip %s' % Max_IP2)
+#                 Variables().writeVariable([['ActiveCube', 2]])
+#                 Variables().writeVariable([['CubeOK', 1]])
+#             except Exception, err:
+#                 s.close()
+#                 Variables().writeVariable([['CubeOK', 0]])
+#                 logger.exception("unable to make connection, trying later %s" % err)
+#                 CreateUIPage().updateWebUI()
+#                 return (message, validData)
+#          
+#         try:
+#             while 1:
+#                 reply = s.recv(1024)
+#                 message += reply
+#         except:
+#             logger.info("Message ended")
+#             
+#         if message != "":
+#             Variables().writeVariable([['CubeOK', 1]])
+#             validData = True
+#             
+#         s.close()
+#         logger.debug(message)
+#         return (message, validData)
+
+    def createSocket(self):
+        logger = logging.getLogger("main.max.createSocket")
+        # Create Socket
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(1)
+            logger.info('Socket Created')
+            return s
+        except socket.error:
+            logger.exception("unable to create socket")
+            s.close()
+            sys.exit()
             
     def getData(self):
         logger = logging.getLogger("main.max.getData")
@@ -97,54 +180,67 @@ class MaxInterface():
         message = ""
         Max_IP, Max_IP2, Max_Port = Variables().readVariables(['MaxIP', 'MaxIP2', 'MaxPort'])
         logger.info('Max Connection Starting on : IP1-%s or IP2-%s on port %s ' % (Max_IP, Max_IP2, Max_Port))
+        cube1 = 0
+        cube2 = 0
+        success = False
+        
+#         # Create Socket
+#         try:
+#             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#             s.settimeout(1)
+#             logger.info('Socket Created')
+#         except socket.error:
+#             logger.exception("unable to create socket")
+#             s.close()
+#             sys.exit()
+        
         try:
-            #Cube 1
-            try:
-                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                s.settimeout(1)
-                logger.info('Socket Created')
-            except socket.error:
-                logger.exception("unable to create socket")
-                s.close()
-                sys.exit()
-                 
             #Connect to Max Cube1
-            try:
-                s.connect((Max_IP, int(Max_Port)))
-                logger.info('Socket Connected to Max1 on ip %s' % Max_IP)
-                Variables().writeVariable([['ActiveCube', 1]])
-                Variables().writeVariable([['CubeOK', 1]])
-            except Exception, err:
-                s.close()
-                Variables().writeVariable([['CubeOK', 0]])
-                logger.exception("unable to make connection, trying later %s" % err)
-                #CreateUIPage().updateWebUI()
-                #return (message, validData)
+            while cube1 < 3 and not success:
+                try:
+                    logger.info('tyring to connect to Max1 on ip %s on try %s' % (Max_IP, cube1))
+                    s = self.createSocket()
+                    s.connect((Max_IP, int(Max_Port)))
+                    logger.info('Socket Connected to Max1 on ip %s on try %s' % (Max_IP, cube1))
+                    Variables().writeVariable([['ActiveCube', 1]])
+                    Variables().writeVariable([['CubeOK', 1]])
+                    success = True
+                    
+                except Exception, err:
+                    s.close()
+                    Variables().writeVariable([['CubeOK', 0]])
+                    logger.exception("unable to make connection, trying later %s" % err)
+                    time.sleep(2)
+                
+                cube1 += 1
+            
+            if not success:
                 raise Exception("Cube 1 fail")
+            
+            
         except Exception, err:
             logger.exception("unable to make connection to Cube 1, trying Cube2 %s" % err)
-            #Cube 2
-            try:
-                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                s.settimeout(1)
-                logger.info('Socket Created')
-            except socket.error:
-                logger.exception("unable to create socket")
-                s.close()
-                sys.exit()
-                 
             #Connect to Max Cube2
-            try:
-                s.connect((Max_IP2, int(Max_Port)))
-                logger.info('Socket Connected to Max2 on ip %s' % Max_IP2)
-                Variables().writeVariable([['ActiveCube', 2]])
-                Variables().writeVariable([['CubeOK', 1]])
-            except Exception, err:
-                s.close()
-                Variables().writeVariable([['CubeOK', 0]])
-                logger.exception("unable to make connection, trying later %s" % err)
-                CreateUIPage().updateWebUI()
-                return (message, validData)
+            while cube2 < 3 and not success:
+                try:
+                    logger.info('tyring to connect to Max2 on ip %s on try %s' % (Max_IP2, cube2))
+                    s = self.createSocket()
+                    s.connect((Max_IP2, int(Max_Port)))
+                    logger.info('Socket Connected to Max2 on ip %s' % Max_IP2)
+                    Variables().writeVariable([['ActiveCube', 2]])
+                    Variables().writeVariable([['CubeOK', 1]])
+                    success = True
+                    
+                except Exception, err:
+                    s.close()
+                    Variables().writeVariable([['CubeOK', 0]])
+                    logger.exception("unable to make connection, trying later %s" % err)
+                    time.sleep(2)
+                    
+                cube2 += 1
+                
+            return (message, validData)
+            
          
         try:
             while 1:
@@ -484,4 +580,4 @@ class MaxInterface():
     
         # Create UI Pages
         CreateUIPage().saveUI(roomTemps)
-        CreateUIPage().saveAdminUI()
+        #CreateUIPage().saveAdminUI()

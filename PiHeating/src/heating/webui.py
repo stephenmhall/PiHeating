@@ -20,14 +20,22 @@ class CreateUIPage():
     def saveUI(self, roomTemps):
         #print 'SAVE UI'
         self.dutyCycle()
+        pageTop = self.pageTop()
+        pageHeaderMain = self.pageHeader('Main UI')
+        pageHeaderAdmin = self.pageHeader('Admin')
+        buttonLayout = self.buttonLayout()
+        filler = self.filler()
+        pageBottom = self.page_bottom()
+        
+        # Create main UI page
         pageText = []
-        pageText.append(self.pageTop())
-        pageText.append(self.pageHeader('Main UI'))
-        pageText.append(self.buttonLayout())
+        pageText.append(pageTop)
+        pageText.append(pageHeaderMain)
+        pageText.append(buttonLayout)
         pageText.append(self.roomTable(roomTemps))
         pageText.append(self.weatherWidget())
-        pageText.append(self.filler())
-        pageText.append(self.page_bottom())
+        pageText.append(filler)
+        pageText.append(pageBottom)
         
         html_text = ''.join(pageText)
         
@@ -35,21 +43,36 @@ class CreateUIPage():
         indexFile.write(html_text)
         indexFile.close()
         
-    def saveAdminUI(self):
-        #print 'SAVE ADMIN UI'
+        # Create Admin UI Page
         pageText = []
-        pageText.append(self.pageTop())
-        pageText.append(self.pageHeader('Admin'))
-        pageText.append(self.buttonLayout())
+        pageText.append(pageTop)
+        pageText.append(pageHeaderAdmin)
+        pageText.append(buttonLayout)
         pageText.append(self.variablesPage())
         pageText.append(self.shutdownButton())
-        pageText.append(self.filler())
-        pageText.append(self.page_bottom())
+        pageText.append(filler)
+        pageText.append(pageBottom)
         html_text = ''.join(pageText)
 
         indexFile = open('admin.html', 'w')
         indexFile.write(html_text)
         indexFile.close()
+        
+#     def saveAdminUI(self):
+#         #print 'SAVE ADMIN UI'
+#         pageText = []
+#         pageText.append(self.pageTop())
+#         pageText.append(self.pageHeader('Admin'))
+#         pageText.append(self.buttonLayout())
+#         pageText.append(self.variablesPage())
+#         pageText.append(self.shutdownButton())
+#         pageText.append(self.filler())
+#         pageText.append(self.page_bottom())
+#         html_text = ''.join(pageText)
+# 
+#         indexFile = open('admin.html', 'w')
+#         indexFile.write(html_text)
+#         indexFile.close()
         
     def rangeGraphUI(self):
         print 'Creating rangeGraph page'
@@ -69,7 +92,7 @@ class CreateUIPage():
         indexFile.close()
         
     def rangeGraphpage(self):
-        baseFontSize = float(VAR.readVariables(['BaseFontSize']))
+        #baseFontSize = float(VAR.readVariables(['BaseFontSize']))
         rooms = DB.getRooms()
         print rooms
         pageText = []
@@ -506,6 +529,7 @@ class CreateUIPage():
         else:
             heatIsOn = 'btn-info btn-md" style="font-size: {}vw;">Heating is OFF '.format(baseFontSize - buttonSize)
             
+        print "Cube state {}".format (cube_state)
         if cube_state:
             cubeIsOn = 'btn-success btn-md" style="font-size: {}vw;">Cube{} '.format(baseFontSize - buttonSize, active_cube)
         else:
