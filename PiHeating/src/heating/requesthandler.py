@@ -240,7 +240,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
     def updateUIPages(self, roomTemps):
         CUI.saveUI(roomTemps)
         #time.sleep(0.5)
-        CUI.saveAdminUI()
+        #CUI.saveAdminUI()
         
     def restart_program(self):
         """Restarts the current program.

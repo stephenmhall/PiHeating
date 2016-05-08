@@ -64,12 +64,18 @@ class MaxInterface():
             
         logger = logging.getLogger("main.max.setNeoPixel")
         logger.info("Setting NeoPixel Lights")
-        cube_state, vera_state, boiler_enabled, interval, boiler_override = Variables().readVariables(['CubeOK',
+        cube_state, vera_state, boiler_enabled, interval, boiler_override, rooms_Ok = Variables().readVariables(['CubeOK',
                                                                             'VeraOK',
                                                                             'BoilerEnabled',
                                                                             'Interval',
-                                                                            'BoilerOverride'])
+                                                                            'BoilerOverride',
+                                                                            'RoomsCorrect'])
         heating_state = DbUtils().getBoiler()[2]
+        
+        # overide CubeState if rooms wrong
+        if not rooms_Ok:
+            cube_state = 2
+            
         sendString = '%s,%s,%s,%s,%s,%s,%s,%s\n\r' %(doChase,
                                                        heating_state,
                                                        interval,
@@ -82,13 +88,13 @@ class MaxInterface():
         logger.info("Sending NeoPixel %s" % sendString)
         input_queue.put(sendString)
         
-    def readSerial(self):
-        logger = logging.getLogger("main.max.readSerial")
-
-        if not self.output_queue.empty():
-            data = self.output_queue.get()
-            logger.info("data received %s" % data)
-            return data
+#     def readSerial(self):
+#         logger = logging.getLogger("main.max.readSerial")
+# 
+#         if not self.output_queue.empty():
+#             data = self.output_queue.get()
+#             logger.info("data received %s" % data)
+#             return data
             
 
 #     def getData(self):
@@ -184,16 +190,6 @@ class MaxInterface():
         cube2 = 0
         success = False
         
-#         # Create Socket
-#         try:
-#             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#             s.settimeout(1)
-#             logger.info('Socket Created')
-#         except socket.error:
-#             logger.exception("unable to create socket")
-#             s.close()
-#             sys.exit()
-        
         try:
             #Connect to Max Cube1
             while cube1 < 3 and not success:
@@ -239,7 +235,7 @@ class MaxInterface():
                     
                 cube2 += 1
                 
-            return (message, validData)
+            
             
          
         try:
@@ -319,9 +315,21 @@ class MaxInterface():
         
     def maxCmd_M(self, line, refresh):
         """ process M response Rooms and Devices"""
+        logger = logging.getLogger("main.max.maxCmd_M")
+        expectedRoomNo = int(Variables().readVariables(['ExpectedNoOfRooms']))
         line = line.split(",")
         es = base64.b64decode(line[2])
         room_num = ord(es[2])
+        logger.info("Number of rooms found : {}".format(room_num))
+        
+        # Check number of rooms
+        if room_num != expectedRoomNo:
+            Variables().writeVariable([['RoomsCorrect', 0]])
+            logger.info("RoomsCorrect set to  : {}".format(0))
+        else:
+            Variables().writeVariable([['RoomsCorrect', 1]])
+            logger.info("RoomsCorrect set to  : {}".format(1))
+            
         es_pos = 3
         this_now = datetime.datetime.now()
         for _ in range(0, room_num):

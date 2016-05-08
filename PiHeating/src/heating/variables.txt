@@ -30,3 +30,5 @@ LoggingLevel,INFO
 ManualHeatingSwitch,1
 UseNeoPixel,0
 BoilerOverride,2
+ExpectedNoOfRooms,5
+RoomsCorrect,0
