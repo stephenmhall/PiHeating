@@ -27,7 +27,7 @@ from os import system
 import hardware
 import time
 #from max import checkHeat, initialiseNeoPixel
-from max import MaxInterface as MAX
+from max import MaxInterface
 
 input_queue = multiprocessing.Queue()
 output_queue = multiprocessing.Queue()
@@ -39,7 +39,7 @@ shutOff_Timer = 0.0
 
 
 def mainCheckHeat(self):
-    MAX().checkHeat(input_queue)
+    MaxInterface().checkHeat(input_queue)
 
 class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
     """Handle requests is separate thread"""
@@ -115,13 +115,13 @@ class Main():
                         self.doLoop()
                     else:
                         self.logger.info("checking heat levels")
-                        MAX().checkHeat(input_queue)
+                        MaxInterface().checkHeat(input_queue)
                         self.logger.info('Running NeoPixel timer')
                         self.logger.info("Memory free this loop %s MB" % hardware.getRAM())
                         self.logger.info("CPU Usage this loop %s" % hardware.getCPUUse())
                         self.logger.debug( "loop interval : %s" %(checkInterval))
                 else:
-                    MAX().checkHeat()
+                    MaxInterface().checkHeat()
                     self.logger.info('Running Windows timer')
                     
                 
@@ -144,7 +144,7 @@ class Main():
         
         self.logger.info("Processing Serial Data : %s" % data)
         if data == "checkSW_ON":
-            MAX().checkHeat(input_queue)
+            MaxInterface().checkHeat(input_queue)
         elif data == "boilerSW_ON":
             boilerEnabled = Variables().readVariables(['BoilerEnabled'])
             if boilerEnabled:
@@ -152,11 +152,11 @@ class Main():
             else:
                 boilerEnabled = 1
             Variables().writeVariable([['BoilerEnabled', boilerEnabled]])
-            MAX().checkHeat(input_queue)
+            MaxInterface().checkHeat(input_queue)
             
         elif data == "rebootSW_ON":
             reboot_Timer = time.time()
-            MAX().setNeoPixel(0, input_queue, 2)
+            MaxInterface().setNeoPixel(0, input_queue, 2)
         elif data == "rebootSW_OFF":
             offTime = time.time()
             if offTime - reboot_Timer >= 3:
@@ -165,7 +165,7 @@ class Main():
                 
         elif data == "shutdownSW_ON":
             shutdown_Timer = time.time()
-            MAX().setNeoPixel(0, input_queue, 1)
+            MaxInterface().setNeoPixel(0, input_queue, 1)
         elif data == "shutdownSW_OFF":
             shutOff_Timer = time.time()
             if shutOff_Timer - shutdown_Timer >= 3:
@@ -179,7 +179,7 @@ class Main():
                 boiler_override = 0
             print boiler_override
             Variables().writeVariable([['BoilerOverride', boiler_override]])
-            MAX().setNeoPixel(0, input_queue, 0)
+            MaxInterface().setNeoPixel(0, input_queue, 0)
 
             
             
