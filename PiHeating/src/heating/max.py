@@ -297,18 +297,22 @@ class MaxInterface():
     def maxCmd_L(self, line):
         """ process L response """
         line = line.split(":")
-        #print line
+        print line
         es = base64.b64decode(line[1])
-        #print es
         es_pos = 0
+        print "hex ", self.hexify(es)
         
         while (es_pos < len(es)):
             dev_len = ord(es[es_pos]) + 1
+            print "Dev Len ", dev_len
             valve_adr = self.hexify(es[es_pos + 1:es_pos + 4])
+            print valve_adr
             valve_status = ord(es[es_pos + 0x05])
+            #print valve_status
             valve_info = ord(es[es_pos + 0x06])
             valve_temp = 0xFF
             valve_curtemp = 0xFF
+            temp_headder = "00"
     
             valve_info_string = '{0}{{:{1}>{2}}}'.format('ob', 0, 8).format(bin(valve_info)[2:])
             valve_mode = str(valve_info_string[8:])
@@ -329,8 +333,19 @@ class MaxInterface():
             if dev_len == 13:
                 valve_pos = 999
                 if valve_info & 3 != 2:
-                    valve_temp = float(int(self.hexify(es[es_pos + 0x08]), 16)) / 2  # set temp
-                    valve_curtemp = float(int(self.hexify(es[es_pos + 0x0C]), 16)) / 10  # measured temp
+                    
+                    #valve_temp = float(int(self.hexify(es[es_pos + 0x08]), 16)) / 2  # set temp
+                    valve_binary = "{0:8b}".format(int(self.hexify(es[es_pos + 0x08]),16))
+                    if valve_binary[0:1] == "1":
+                        temp_headder = "01"
+                        valve_binary = valve_binary[-6:]
+                    valve_temp = float(int(valve_binary,2)) / 2  # set temp
+                    print valve_temp
+                    
+                    curr_binary = "{0}{1:8b}".format(temp_headder,int(self.hexify(es[es_pos + 0x0C]),16))
+                    valve_curtemp = float(int(curr_binary, 2)) / 10  # measured temp
+                    print valve_curtemp
+                    
             # HeatingThermostat (dev_type 1 or 2)
             elif dev_len == 12:
                 valve_pos = ord(es[es_pos + 0x07])
@@ -352,6 +367,7 @@ class MaxInterface():
         for keys in valves:
             dbList = keys,valves[keys][0],valves[keys][1],valves[keys][2],valves[keys][3],valves[keys][4],valves[keys][5]
             dbMessage.append(dbList)
+            #print dbList
         DbUtils().updateValves(dbMessage)
             
     

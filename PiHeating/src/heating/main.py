@@ -121,7 +121,7 @@ class Main():
                         self.logger.info("CPU Usage this loop %s" % hardware.getCPUUse())
                         self.logger.debug( "loop interval : %s" %(checkInterval))
                 else:
-                    MaxInterface().checkHeat()
+                    MaxInterface().checkHeat(input_queue)
                     self.logger.info('Running Windows timer')
                     
                 
