@@ -2,6 +2,7 @@ import time
 
 from database import DbUtils
 from variables import Variables
+import logging
 
 DB = DbUtils()
 VAR = Variables()
@@ -19,7 +20,7 @@ class CreateUIPage():
         
     def saveUI(self, roomTemps):
         #print 'SAVE UI'
-        self.dutyCycle()
+        #self.dutyCycle()
         pageTop = self.pageTop()
         pageHeaderMain = self.pageHeader('Main UI')
         pageHeaderAdmin = self.pageHeader('Admin')
@@ -57,22 +58,6 @@ class CreateUIPage():
         indexFile = open('admin.html', 'w')
         indexFile.write(html_text)
         indexFile.close()
-        
-#     def saveAdminUI(self):
-#         #print 'SAVE ADMIN UI'
-#         pageText = []
-#         pageText.append(self.pageTop())
-#         pageText.append(self.pageHeader('Admin'))
-#         pageText.append(self.buttonLayout())
-#         pageText.append(self.variablesPage())
-#         pageText.append(self.shutdownButton())
-#         pageText.append(self.filler())
-#         pageText.append(self.page_bottom())
-#         html_text = ''.join(pageText)
-# 
-#         indexFile = open('admin.html', 'w')
-#         indexFile.write(html_text)
-#         indexFile.close()
         
     def rangeGraphUI(self):
         print 'Creating rangeGraph page'
@@ -131,30 +116,43 @@ class CreateUIPage():
     def OnUpdateTime(self):
         self.nowTime = time.strftime("%b %d %Y %H:%M:%S", time.localtime(time.time()))
         return self.nowTime
-    
-    def dutyCycle(self):
-        currentTime = time.time()
-        timeLimit = currentTime - 86400
+
+    def dutyCycle(self, interval):
+        logger = logging.getLogger("main.webui.dutycycle")
+        logger.info("Calculating duty cycle for {} seconds".format(interval))
+        currentTime = int(time.time())
+        timeLimit = int(currentTime - interval) # 86400
         boilerStates = DB.getTimedBoiler(timeLimit)
+        onTime = 0
+        offTime = 0
+        
+        checkTime = timeLimit
         try:
-            startTime  = float(boilerStates[0][1])
-            startState = boilerStates[0][2]
             
-            timeBoilerOn  = 0
-            timeBoilerOff = 0
-            
-            for i in range(1, len(boilerStates)):
-                stateTime = float(boilerStates[i][1]) - startTime
-                if startState == 1:
-                    timeBoilerOn  += stateTime
+            for times in boilerStates:
+                loopTime = int(float(times[1]))
+                loopState = times[2]
+                elapsedTime = (loopTime - checkTime)
+                if loopState:
+                    offTime += elapsedTime
                 else:
-                    timeBoilerOff += stateTime
-                startTime  = float(boilerStates[i][1])
-                startState = boilerStates[i][2]
+                    onTime += elapsedTime
+                checkTime = loopTime
+                
+            elapsedTime = currentTime - checkTime
             
-            dutyCycle = 100 / ((timeBoilerOn + timeBoilerOff) / timeBoilerOn)
-        except:
+            if loopState:
+                onTime += elapsedTime
+            else:
+                offTime += elapsedTime
+                
+            dutyCycle = 100 / (86400 / onTime)
+            
+        except Exception, err:
+            logger.info('No duty cycle data because {}'.format(err))
             dutyCycle = 0
+            
+        logger.info("Duty Cycle :{}%".format(dutyCycle)) 
         return int(dutyCycle)
 
 
@@ -517,7 +515,7 @@ class CreateUIPage():
                                                                                              'VeraOK',
                                                                                              'BaseFontSize',
                                                                                              'RoomsCorrect'])
-        heating_cycle = self.dutyCycle()
+        heating_cycle = self.dutyCycle(86400)
 
         
         if boiler_state:

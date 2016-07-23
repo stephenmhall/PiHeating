@@ -5,6 +5,7 @@ Created on 23 Nov 2015
 '''
 import datetime
 import time
+import logging
 from database import DbUtils
 DB = DbUtils()
 
@@ -25,7 +26,7 @@ class MakeGraph():
         
         pageText.append(self.html_Top())
         pageText.append(self.html_Data(tempData, boilerData))
-        pageText.append(self.html_Options(cleanName))
+        pageText.append(self.html_Options(cleanName, (86400 * graphPeriod)))
         pageText.append(self.html_Chart())
         pageText.append(self.html_Body())
         
@@ -34,6 +35,44 @@ class MakeGraph():
         f = open('graph.html', 'w')
         f.write(html_text)
         f.close()
+        
+    def dutyCycle(self, interval):
+        logger = logging.getLogger("main.graphing.dutycycle")
+        logger.info("Calculating duty cycle for {} seconds".format(interval))
+        currentTime = int(time.time())
+        timeLimit = int(currentTime - interval) # 86400
+        boilerStates = DB.getTimedBoiler(timeLimit)
+        onTime = 0
+        offTime = 0
+        
+        checkTime = timeLimit
+        try:
+            
+            for times in boilerStates:
+                loopTime = int(float(times[1]))
+                loopState = times[2]
+                elapsedTime = (loopTime - checkTime)
+                if loopState:
+                    offTime += elapsedTime
+                else:
+                    onTime += elapsedTime
+                checkTime = loopTime
+                
+            elapsedTime = currentTime - checkTime
+            
+            if loopState:
+                onTime += elapsedTime
+            else:
+                offTime += elapsedTime
+                
+            dutyCycle = 100 / (interval / onTime)
+            
+        except Exception, err:
+            logger.info('No duty cycle data because {}'.format(err))
+            dutyCycle = 0
+            
+        logger.info("Duty Cycle :{}%".format(dutyCycle)) 
+        return int(dutyCycle)
         
 
 
@@ -88,10 +127,11 @@ class MakeGraph():
         html_text = ''.join(pageText)
         return html_text
 
-    def html_Options(self, roomName):
+    def html_Options(self, roomName, timeInterval):
+        dutyCycle = self.dutyCycle(timeInterval)
         html_text = """
         var options = {{
-            title : 'Temperature of {}',
+            title : 'Temperature of {}, Heating has been on {}% of the time',
             seriesType: 'line',
             interpolateNulls: true,
             series: {{
@@ -100,7 +140,7 @@ class MakeGraph():
                 4: {{type: 'area'}}
             }}
         }};
-             """.format(roomName)
+             """.format(roomName, dutyCycle)
         return html_text
 
     def html_Chart(self):
