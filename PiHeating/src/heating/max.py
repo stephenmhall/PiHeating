@@ -14,7 +14,7 @@ import requests
 
 import multiprocessing
 import neopixelserial
-from time import sleep
+#from time import sleep
 
 maxDetails = {}
 rooms = {}
