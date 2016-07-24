@@ -297,16 +297,16 @@ class MaxInterface():
     def maxCmd_L(self, line):
         """ process L response """
         line = line.split(":")
-        print line
+        #print line
         es = base64.b64decode(line[1])
         es_pos = 0
-        print "hex ", self.hexify(es)
+        #print "hex ", self.hexify(es)
         
         while (es_pos < len(es)):
             dev_len = ord(es[es_pos]) + 1
-            print "Dev Len ", dev_len
+            #print "Dev Len ", dev_len
             valve_adr = self.hexify(es[es_pos + 1:es_pos + 4])
-            print valve_adr
+            #print valve_adr
             valve_status = ord(es[es_pos + 0x05])
             #print valve_status
             valve_info = ord(es[es_pos + 0x06])
@@ -340,11 +340,11 @@ class MaxInterface():
                         temp_headder = "01"
                         valve_binary = valve_binary[-6:]
                     valve_temp = float(int(valve_binary,2)) / 2  # set temp
-                    print valve_temp
+                    #print valve_temp
                     
                     curr_binary = "{0}{1:8b}".format(temp_headder,int(self.hexify(es[es_pos + 0x0C]),16))
                     valve_curtemp = float(int(curr_binary, 2)) / 10  # measured temp
-                    print valve_curtemp
+                    #print valve_curtemp
                     
             # HeatingThermostat (dev_type 1 or 2)
             elif dev_len == 12:

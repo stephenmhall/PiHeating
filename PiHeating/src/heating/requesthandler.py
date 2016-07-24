@@ -8,8 +8,6 @@ from webui import CreateUIPage
 from graphing import MakeGraph
 from variables import Variables
 from sendmessage import SendMessage
-#from max import checkHeat
-#from heatinggpio import MyGpio
 from heatinggpio import buttonCheckHeat, flashCube
 from max import MaxInterface
 VAR = Variables()
@@ -43,7 +41,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             self.path="/index.html"
             time.sleep(1)
             if useNeoPixel:
-                MaxInterface().checkHeat()
+                MaxInterface().checkHeat(self.input_queue)
             else:
                 buttonCheckHeat("requesthandler.ecomode")
             
@@ -53,7 +51,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             self.path="/index.html"
             time.sleep(1)
             if useNeoPixel:
-                MaxInterface().checkHeat()
+                MaxInterface().checkHeat(self.input_queue)
             else:
                 buttonCheckHeat("requesthandler.automode")
 
@@ -77,7 +75,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             self.path="/index.html"
             time.sleep(1)
             if useNeoPixel:
-                MaxInterface().checkHeat()
+                MaxInterface().checkHeat(self.input_queue)
             else:
                 buttonCheckHeat("requesthandler.mode")
             
@@ -90,7 +88,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             VAR.writeVariable([['BoilerEnabled', 0]])
             self.path = "/index.html"
             if useNeoPixel:
-                MaxInterface().checkHeat()
+                MaxInterface().checkHeat(self.input_queue)
             else:
                 buttonCheckHeat("requesthandler.Boiler-disable")
             
@@ -98,7 +96,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             VAR.writeVariable([['BoilerEnabled', 1]])
             self.path = "/index.html"
             if useNeoPixel:
-                MaxInterface().checkHeat()
+                MaxInterface().checkHeat(self.input_queue)
             else:
                 buttonCheckHeat("requesthandler.boiler-enable")
             

@@ -380,7 +380,7 @@ class CreateUIPage():
     def pageHeader(self, pageType):
         
         if pageType == 'Main UI':
-            buttonText = """<a href="/admin.html" class="btn btn-warning btn-md" role="button">Admin Page</a>"""
+            buttonText = """<a href="/admin.html" class="btn btn-warning btn-md" role="button">Admin Page V2.1</a>"""
         else:
             buttonText = """<a href="/index.html" class="btn btn-warning btn-md" role="button">Main UI</a>"""
         

@@ -9,7 +9,7 @@ test change
 '''
 from __future__ import division
 
-__updated__ = "2016-07-23"
+__updated__ = "2016-07-24"
 
 import logging
 from logging.handlers import RotatingFileHandler
@@ -85,7 +85,7 @@ class Main():
 
         # Or start the GPIO
         else:
-            setupGPIO()
+            setupGPIO(input_queue)
         
         # Start Web UI
         self.startKioskServer()
