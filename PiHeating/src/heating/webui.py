@@ -382,7 +382,7 @@ class CreateUIPage():
     def pageHeader(self, pageType):
         
         if pageType == 'Main UI':
-            buttonText = """<a href="/admin.html" class="btn btn-warning btn-md" role="button">Admin Page V2.1</a>"""
+            buttonText = """<a href="/admin.html" class="btn btn-warning btn-md" role="button">Admin Page V2.2</a>"""
         else:
             buttonText = """<a href="/index.html" class="btn btn-warning btn-md" role="button">Main UI</a>"""
         
@@ -410,6 +410,7 @@ class CreateUIPage():
     
     def roomTable(self, roomTemps):
         sendVeraVirtualTemps, veraRooms = VAR.readVariables(['VeraVirtualTemps', 'VeraVirtualRooms'])
+        veraRoomsDict = VT.veraRoomDict(veraRooms)
         
         baseFontSize = float(VAR.readVariables(['BaseFontSize']))
         pageText = []
@@ -439,8 +440,8 @@ class CreateUIPage():
             roomModes = ['AUTO', 'MANUAL', 'ECO', 'BOOST', 'VACATION']
             
             if sendVeraVirtualTemps:
-                if veraRooms.has_key(roomText):
-                    VT.veraSendTemp(self, veraRooms[roomText], truTemp)
+                if veraRoomsDict.has_key(roomText):
+                    VT.veraSendTemp(veraRoomsDict[roomText], truTemp)
                 
             if valvePos > 60:      # how far valve is open
                 cold_text = 'btn-info'

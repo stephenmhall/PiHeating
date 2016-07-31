@@ -33,5 +33,5 @@ BoilerOverride,2
 ExpectedNoOfRooms,5
 RoomsCorrect,0
 VeraVirtualTemps,1
-VeraVirtualRooms,{'Bedroom 2':103, 'Bedroom 1':135, 'Dining-Exten':139}
-VeraUpdateTemps,http://{0}:{1}/data_request?id=variableset&DeviceNum={2}&serviceId=urn:upnp-org:serviceId:TemperatureSensor1&Variable=CurrentTemperature&Value={3}
+VeraVirtualRooms,{'Bedroom 2':103; 'Bedroom 1':135; 'Dining-Extension':139; 'Living Room':157}
+VeraUpdateTemps,http://192.168.0.13:3480/data_request?id=variableset&DeviceNum={}&serviceId=urn:upnp-org:serviceId:TemperatureSensor1&Variable=CurrentTemperature&Value={}
