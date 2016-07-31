@@ -2,10 +2,12 @@ import time
 
 from database import DbUtils
 from variables import Variables
+from veratemps import VeraVirtualTemps
 import logging
 
 DB = DbUtils()
 VAR = Variables()
+VT = VeraVirtualTemps()
 
 class CreateUIPage():
     def __init__(self):
@@ -407,6 +409,8 @@ class CreateUIPage():
         return html_text
     
     def roomTable(self, roomTemps):
+        sendVeraVirtualTemps, veraRooms = VAR.readVariables(['VeraVirtualTemps', 'VeraVirtualRooms'])
+        
         baseFontSize = float(VAR.readVariables(['BaseFontSize']))
         pageText = []
         pageText.append("""
@@ -433,6 +437,11 @@ class CreateUIPage():
             valvePos = rooms[4]
             roomMode = rooms[5]
             roomModes = ['AUTO', 'MANUAL', 'ECO', 'BOOST', 'VACATION']
+            
+            if sendVeraVirtualTemps:
+                if veraRooms.has_key(roomText):
+                    VT.veraSendTemp(self, veraRooms[roomText], truTemp)
+                
             if valvePos > 60:      # how far valve is open
                 cold_text = 'btn-info'
             else:
