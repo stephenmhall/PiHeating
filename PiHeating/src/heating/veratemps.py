@@ -17,12 +17,12 @@ class VeraVirtualTemps(object):
         
         
     def veraSendTemp(self, roomID, temp):
-        logger = logging.getLogger("main.veratemps")
+        logger = logging.getLogger("main.veratemps.veraSendTemps")
         
         veraSendCommand = Variables().readVariables(['VeraUpdateTemps'])
         try:
             sendString = veraSendCommand.format(roomID, temp)
-            logger.info("Sending to Vera {}".format (sendString))
+            logger.debug("Sending to Vera {}".format (sendString))
             _ = requests.get(sendString, timeout=5)
         except Exception, err:
             logger.info("vera send fault{}".format (err))

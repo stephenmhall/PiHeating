@@ -159,10 +159,13 @@ class CreateUIPage():
 
 
     def createRooms(self):
+        logger = logging.getLogger("main.webui.createrooms")
+        logger.info("Creating room info")
         logTime = time.time()
         maxRooms = DB.getRooms()
         maxDevices = DB.getDevices()
         maxValves = DB.getValves()
+        goodTemps = DB.getGoodTemps()
         roomTemps = []
         global boilerOn
         for rooms in maxRooms:
@@ -199,6 +202,16 @@ class CreateUIPage():
                     
             if wallTemp != 999:
                 actualTemp = wallTemp
+                
+            #Use stored good temperature if it exists
+            if actualTemp == '0.0':
+                logger.info("{} temp was 0.0".format(roomText))
+                actualTemp = goodTemps[roomText]
+            #Or save new good temp to DB
+            
+            else:
+                msg = (roomText, actualTemp)
+                DB.updateGoodTemps(msg)
                 
             msg = (roomName,logTime,roomSetpoint,actualTemp,roomOpen,roomMode)
             roomTemps.append(msg)

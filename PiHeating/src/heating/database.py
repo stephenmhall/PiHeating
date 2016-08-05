@@ -11,6 +11,14 @@ class DbUtils():
         Database utilities
         """
         self.logger = logging.getLogger("main.database.DbUtils")
+        conn = sqlite3.connect(dataBase)
+        cursor = conn.cursor() #Cursor object to execute sql commands
+        
+        cursor.execute("""CREATE TABLE IF NOT EXISTS lastgoodtemps
+                        (ID INTEGER PRIMARY KEY ASC,
+                         RoomName TEXT,
+                         Temp TEXT)
+                        """)
 
     def initialiseDB(self):
         #print "initialising database"
@@ -68,6 +76,33 @@ class DbUtils():
                          OutsideTemp TEXT)
                         """)
         
+        cursor.execute("""CREATE TABLE IF NOT EXISTS lastgoodtemps
+                        (ID INTEGER PRIMARY KEY ASC,
+                         RoomName TEXT,
+                         Temp TEXT)
+                        """)
+        
+    def updateGoodTemps(self, msg):
+        try:
+            conn = sqlite3.connect(dataBase)
+            cursor = conn.cursor()
+            cursor.execute("INSERT or REPLACE into lastgoodtemps(ID,RoomName,Temp)\
+                                 VALUES(NULL, ?, ?)", msg)
+            conn.commit()
+            
+        except Exception as e:
+            conn.rollback()
+            raise e
+        finally:
+            conn.close()
+            
+    def getGoodTemps(self):
+        conn = sqlite3.connect(dataBase)
+        cursor = conn.cursor()
+        with conn:
+            cursor.execute("SELECT * FROM lastgoodtemps")
+            variables = cursor.fetchall()
+            return variables
         
             
     def insertTemps(self, msg):

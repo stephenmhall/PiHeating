@@ -447,6 +447,7 @@ class MaxInterface():
         roomTemps = CreateUIPage().createRooms()
         outsideTemp = self.getCurrentOutsidetemp()
         
+        #Add outside temp to each rooms information
         for i in range (len(roomTemps)):
             roomTemps[i] = roomTemps[i] + (str(outsideTemp),)
     
