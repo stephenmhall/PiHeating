@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import logging
 import sqlite3
+import time
 dataBase =  'heating.db'
 module_logger = logging.getLogger("main.database")
 
@@ -154,6 +155,14 @@ class DbUtils():
             cursor.execute("""SELECT * FROM temps WHERE RoomName = '{}' AND time > {}""".format(roomName, currentTime))
             variables = cursor.fetchall()
             return variables
+        
+    def getLastTemp(self, roomName):
+        conn = sqlite3.connect(dataBase)
+        cursor = conn.cursor()
+        with conn:
+            cursor.execute("""SELECT ActTemp FROM temps WHERE RoomName = '{}' AND ActTemp > 0.0 order by time desc limit 1""".format(roomName))
+            variables = cursor.fetchall()
+            return variables[0][0]
         
     def getCubes(self):
         module_logger.debug("Retrieving Cube information")

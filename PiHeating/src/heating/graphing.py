@@ -6,6 +6,7 @@ Created on 23 Nov 2015
 import datetime
 import time
 import logging
+import urllib
 from database import DbUtils
 DB = DbUtils()
 
@@ -17,7 +18,8 @@ class MakeGraph():
 
     def createGraph(self, roomName):
         roomSplit = roomName.split('?')
-        cleanName = roomSplit[1].replace('%20', ' ')
+        #cleanName = roomSplit[1].replace('%20', ' ')
+        cleanName = urllib.unquote(roomSplit[1])
         graphPeriod = int(roomSplit[2])
         currentTime = time.time() - 86400 * graphPeriod
         tempData = DB.getTemps(cleanName, currentTime)
@@ -30,7 +32,7 @@ class MakeGraph():
         pageText.append(self.html_Chart())
         pageText.append(self.html_Body())
         
-        html_text = ''.join(pageText)
+        html_text = "".join(pageText)# changed for ' in room name
         
         f = open('graph.html', 'w')
         f.write(html_text)
@@ -124,14 +126,14 @@ class MakeGraph():
             """.format(timeString,setPoint,realTemp,outsideTemp,boilerOn,valvePos))
         pageText.append("""]);
         """)
-        html_text = ''.join(pageText)
+        html_text = "".join(pageText)
         return html_text
 
     def html_Options(self, roomName, timeInterval):
         dutyCycle = self.dutyCycle(timeInterval)
         html_text = """
         var options = {{
-            title : 'Temperature of {}, Heating has been on {}% of the time',
+            title : "Temperature of {}, Heating has been on {}% of the time",
             seriesType: 'line',
             interpolateNulls: true,
             series: {{
@@ -140,7 +142,7 @@ class MakeGraph():
                 4: {{type: 'area'}}
             }}
         }};
-             """.format(roomName, dutyCycle)
+             """.format(roomName, dutyCycle)# Changed to double quote above
         return html_text
 
     def html_Chart(self):

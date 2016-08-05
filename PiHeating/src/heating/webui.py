@@ -196,8 +196,10 @@ class CreateUIPage():
                     wallTemp = i[4]
                 else:
                     roomOpen = i[2]
+                    
             if wallTemp != 999:
                 actualTemp = wallTemp
+                
             msg = (roomName,logTime,roomSetpoint,actualTemp,roomOpen,roomMode)
             roomTemps.append(msg)
         return roomTemps

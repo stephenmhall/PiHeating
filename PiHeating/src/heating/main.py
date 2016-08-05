@@ -9,10 +9,11 @@ test change
 '''
 from __future__ import division
 
-__updated__ = "2016-07-24"
+__updated__ = "2016-07-31"
 
 import logging
 from logging.handlers import RotatingFileHandler
+from database import DbUtils
 import threading
 import multiprocessing
 import neopixelserial
@@ -20,7 +21,6 @@ from SocketServer import ThreadingMixIn
 from BaseHTTPServer import HTTPServer
 from requesthandler import MyRequestHandler
 from heatinggpio import setupGPIO, buttonCheckHeat, hBeat
-from database import DbUtils
 from variables import Variables
 from sys import platform as _platform
 from os import system
@@ -76,6 +76,8 @@ class Main():
             self.logger.exception("Database Initialised %s" % err)
         self.logger.info("Free Memory at Boot %s MB" % hardware.getRAM())
         self.logger.info("CPU Usage at Boot %s" % hardware.getCPUUse())
+        
+        
         
         # Start Serial connection worker if using NeoPixel
         if useNeoPixel:
