@@ -15,8 +15,7 @@ class DbUtils():
         cursor = conn.cursor() #Cursor object to execute sql commands
         
         cursor.execute("""CREATE TABLE IF NOT EXISTS lastgoodtemps
-                        (ID INTEGER PRIMARY KEY ASC,
-                         RoomName TEXT,
+                        (RoomName TEXT PRIMARY KEY,
                          Temp TEXT)
                         """)
 
@@ -77,8 +76,7 @@ class DbUtils():
                         """)
         
         cursor.execute("""CREATE TABLE IF NOT EXISTS lastgoodtemps
-                        (ID INTEGER PRIMARY KEY ASC,
-                         RoomName TEXT,
+                        (RoomName TEXT PRIMARY KEY,
                          Temp TEXT)
                         """)
         
@@ -86,8 +84,8 @@ class DbUtils():
         try:
             conn = sqlite3.connect(dataBase)
             cursor = conn.cursor()
-            cursor.execute("INSERT or REPLACE into lastgoodtemps(ID,RoomName,Temp)\
-                                 VALUES(NULL, ?, ?)", msg)
+            cursor.execute("INSERT or REPLACE into lastgoodtemps(RoomName,Temp)\
+                                 VALUES(?, ?)", msg)
             conn.commit()
             
         except Exception as e:
