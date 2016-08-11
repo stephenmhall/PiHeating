@@ -9,27 +9,29 @@ DB = DbUtils()
 VAR = Variables()
 VT = VeraVirtualTemps()
 
+
 class CreateUIPage():
+
     def __init__(self):
         """
         Create UI Webpage
         """
-        
+
     def updateWebUI(self):
         roomTemps = self.createRooms()
         self.saveUI(roomTemps)
         self.saveAdminUI()
-        
+
     def saveUI(self, roomTemps):
-        #print 'SAVE UI'
-        #self.dutyCycle()
+        # print 'SAVE UI'
+        # self.dutyCycle()
         pageTop = self.pageTop()
         pageHeaderMain = self.pageHeader('Main UI')
         pageHeaderAdmin = self.pageHeader('Admin')
         buttonLayout = self.buttonLayout()
         filler = self.filler()
         pageBottom = self.page_bottom()
-        
+
         # Create main UI page
         pageText = []
         pageText.append(pageTop)
@@ -39,13 +41,13 @@ class CreateUIPage():
         pageText.append(self.weatherWidget())
         pageText.append(filler)
         pageText.append(pageBottom)
-        
+
         html_text = ''.join(pageText)
-        
+
         indexFile = open('index.html', 'w')
         indexFile.write(html_text)
         indexFile.close()
-        
+
         # Create Admin UI Page
         pageText = []
         pageText.append(pageTop)
@@ -60,7 +62,7 @@ class CreateUIPage():
         indexFile = open('admin.html', 'w')
         indexFile.write(html_text)
         indexFile.close()
-        
+
     def rangeGraphUI(self):
         print 'Creating rangeGraph page'
         pageText = []
@@ -73,11 +75,11 @@ class CreateUIPage():
         pageText.append(self.filler())
         pageText.append(self.page_bottom())
         html_text = ''.join(pageText)
-        
+
         indexFile = open('rangegraph.html', 'w')
         indexFile.write(html_text)
         indexFile.close()
-        
+
     def rangeGraphpage(self):
         #baseFontSize = float(VAR.readVariables(['BaseFontSize']))
         rooms = DB.getRooms()
@@ -99,7 +101,7 @@ class CreateUIPage():
         pageText.append("""
         </ul>
     </div>""")
-                        
+
         pageText.append("""
         <div id="datetimepicker" class="input-append date">
       <input type="text"></input>
@@ -113,24 +115,24 @@ class CreateUIPage():
             """)
         html_text = ''.join(pageText)
         return html_text
-        
-        
+
     def OnUpdateTime(self):
-        self.nowTime = time.strftime("%b %d %Y %H:%M:%S", time.localtime(time.time()))
+        self.nowTime = time.strftime(
+            "%b %d %Y %H:%M:%S", time.localtime(time.time()))
         return self.nowTime
 
     def dutyCycle(self, interval):
         logger = logging.getLogger("main.webui.dutycycle")
         logger.info("Calculating duty cycle for {} seconds".format(interval))
         currentTime = int(time.time())
-        timeLimit = int(currentTime - interval) # 86400
+        timeLimit = int(currentTime - interval)  # 86400
         boilerStates = DB.getTimedBoiler(timeLimit)
         onTime = 0
         offTime = 0
-        
+
         checkTime = timeLimit
         try:
-            
+
             for times in boilerStates:
                 loopTime = int(float(times[1]))
                 loopState = times[2]
@@ -140,23 +142,22 @@ class CreateUIPage():
                 else:
                     onTime += elapsedTime
                 checkTime = loopTime
-                
+
             elapsedTime = currentTime - checkTime
-            
+
             if loopState:
                 onTime += elapsedTime
             else:
                 offTime += elapsedTime
-                
+
             dutyCycle = 100 / (86400 / onTime)
-            
+
         except Exception, err:
             logger.info('No duty cycle data because {}'.format(err))
             dutyCycle = 0
-            
-        logger.info("Duty Cycle :{}%".format(dutyCycle)) 
-        return int(dutyCycle)
 
+        logger.info("Duty Cycle :{}%".format(dutyCycle))
+        return int(dutyCycle)
 
     def createRooms(self):
         logger = logging.getLogger("main.webui.createrooms")
@@ -165,30 +166,32 @@ class CreateUIPage():
         maxRooms = DB.getRooms()
         maxDevices = DB.getDevices()
         maxValves = DB.getValves()
-        goodTemps = DB.getGoodTemps()
+        goodTempsString = DB.getGoodTemps()
+        goodTemps = dict(goodTempsString)
         roomTemps = []
         global boilerOn
         for rooms in maxRooms:
-            #print rooms
+            # print rooms
             roomValves = []
             roomNumber = rooms[0]
             roomText = rooms[1]
             for devices in maxDevices:
                 if devices[4] == roomNumber:
                     for valves in maxValves:
-                        valveID       = valves[0]
-                        valveOpen     = valves[1]
+                        valveID = valves[0]
+                        valveOpen = valves[1]
                         valveSetPoint = valves[2]
-                        valvesTemp    = valves[3]
-                        valvesMode    = valves[4]
-                        valvesLink    = valves[5]
-                        valvesBatt    = valves[6]
-                        
-                        if valveID == devices[0]: # valve is in current room
-                            roomDetails = (roomText,roomNumber,valveOpen,valveSetPoint,valvesTemp,valvesMode,valvesLink,valvesBatt)
+                        valvesTemp = valves[3]
+                        valvesMode = valves[4]
+                        valvesLink = valves[5]
+                        valvesBatt = valves[6]
+
+                        if valveID == devices[0]:  # valve is in current room
+                            roomDetails = (
+                                roomText, roomNumber, valveOpen, valveSetPoint, valvesTemp, valvesMode, valvesLink, valvesBatt)
                             roomValves.append(roomDetails)
-                            
-                            #print roomValves
+
+                            # print roomValves
             wallTemp = 999
             for i in roomValves:
                 roomName = i[0]
@@ -199,37 +202,41 @@ class CreateUIPage():
                     wallTemp = i[4]
                 else:
                     roomOpen = i[2]
-                    
+
             if wallTemp != 999:
                 actualTemp = wallTemp
-                
-            #Use stored good temperature if it exists
-            if actualTemp == '0.0':
+
+            # Use stored good temperature if it exists
+            # print actualTemp
+            if actualTemp == "0.0":
                 logger.info("{} temp was 0.0".format(roomText))
+                # print goodTemps
                 actualTemp = goodTemps[roomText]
-            #Or save new good temp to DB
-            
+                # print actualTemp
+            # Or save new good temp to DB
+
             else:
                 msg = (roomText, actualTemp)
                 DB.updateGoodTemps(msg)
-                
-            msg = (roomName,logTime,roomSetpoint,actualTemp,roomOpen,roomMode)
+
+            msg = (roomName, logTime, roomSetpoint,
+                   actualTemp, roomOpen, roomMode)
             roomTemps.append(msg)
         return roomTemps
-        
+
     def pageTop(self):
-        webRefresh, baseFontSize = VAR.readVariables(['PageRefresh', 'BaseFontSize'])
+        webRefresh, baseFontSize = VAR.readVariables(
+            ['PageRefresh', 'BaseFontSize'])
         pageText = []
         pageText.append("""
         <!DOCTYPE html>
         <html lang="en">
         <head>
             <meta charset="utf-8">""")
-            
+
         pageText.append("""
             <meta http-equiv="refresh" content="{}; URL=index.html" >""".format(webRefresh))
-            
-            
+
         pageText.append("""
             <META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
             <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -392,17 +399,17 @@ class CreateUIPage():
         <body onload=display_ct();>""" % baseFontSize)
         html_text = ''.join(pageText)
         return html_text
-    
-    
+
     def pageHeader(self, pageType):
-        
+
         if pageType == 'Main UI':
             buttonText = """<a href="/admin.html" class="btn btn-warning btn-md" role="button">Admin Page V2.2</a>"""
         else:
             buttonText = """<a href="/index.html" class="btn btn-warning btn-md" role="button">Main UI</a>"""
-        
-        webRefresh, heat_Interval, boiler_enabled = VAR.readVariables(['PageRefresh', 'Interval', 'BoilerEnabled'])
-        
+
+        webRefresh, heat_Interval, boiler_enabled = VAR.readVariables(
+            ['PageRefresh', 'Interval', 'BoilerEnabled'])
+
         theTime = self.OnUpdateTime()
         if boiler_enabled != 1:
             heat_Interval = heat_Interval * 2
@@ -422,11 +429,12 @@ class CreateUIPage():
         </div>
         <main id="content" role="main">""".format(buttonText, theTime, heat_Interval, webRefresh)
         return html_text
-    
+
     def roomTable(self, roomTemps):
-        sendVeraVirtualTemps, veraRooms = VAR.readVariables(['VeraVirtualTemps', 'VeraVirtualRooms'])
+        sendVeraVirtualTemps, veraRooms = VAR.readVariables(
+            ['VeraVirtualTemps', 'VeraVirtualRooms'])
         veraRoomsDict = VT.veraRoomDict(veraRooms)
-        
+
         baseFontSize = float(VAR.readVariables(['BaseFontSize']))
         pageText = []
         pageText.append("""
@@ -448,16 +456,16 @@ class CreateUIPage():
               """.format(baseFontSize - 1.2))
         for rooms in roomTemps:
             roomText = rooms[0]
-            setTemp  = rooms[2]
-            truTemp  = rooms[3]
+            setTemp = rooms[2]
+            truTemp = rooms[3]
             valvePos = rooms[4]
             roomMode = rooms[5]
             roomModes = ['AUTO', 'MANUAL', 'ECO', 'BOOST', 'VACATION']
-            
+
             if sendVeraVirtualTemps:
                 if veraRoomsDict.has_key(roomText):
                     VT.veraSendTemp(veraRoomsDict[roomText], truTemp)
-                
+
             if valvePos > 60:      # how far valve is open
                 cold_text = 'btn-info'
             else:
@@ -475,11 +483,11 @@ class CreateUIPage():
                         """.format(baseFontSize - 1.2, roomText[0:12]))
             for i in range(1, 7):
                 pageText.append("""<li><a href="/graph?{0}?{1}">Graph {1} - Day(s)</a></li>
-                        """.format(roomText,i))
+                        """.format(roomText, i))
 
             pageText.append("""</ul>
                         </div>""")
-            #Add Mode buttons
+            # Add Mode buttons
             pageText.append("""
             <div class="btn-group">
                 <a class="btn {0} btn-lg dropdown-toggle btn-mode" data-toggle="dropdown" href="#"
@@ -488,16 +496,16 @@ class CreateUIPage():
                 <span class="caret"></span>
             </a>
             <ul class="dropdown-menu">
-                """.format(cold_text,roomMode,baseFontSize - 1.2))
-            
+                """.format(cold_text, roomMode, baseFontSize - 1.2))
+
             for mode in roomModes:
                 pageText.append("""<li><a href="/mode?{0}?{1}?{2}">{0}</a></li>
                 """.format(mode, roomText, setTemp))
 
             pageText.append("""</ul>
             </div>""")
-            
-            #Add Set Temperature Buttons
+
+            # Add Set Temperature Buttons
             pageText.append("""
             <div class="btn btn-group">
                 <a class="btn {} btn-lg dropdown-toggle" data-toggle="dropdown" href="#"
@@ -506,66 +514,73 @@ class CreateUIPage():
                 <span class="caret"></span>
             </a>
             <ul class="dropdown-menu">
-                """.format(cold_text,baseFontSize - 1.2, setTemp))
-            
+                """.format(cold_text, baseFontSize - 1.2, setTemp))
+
             for i in range(20, 50):
                 pageText.append("""<li><a href="/mode?{0}?{1}?{2}">{2}</a></li>
-                """.format(roomMode, roomText, float(i)/2))
+                """.format(roomMode, roomText, float(i) / 2))
 
             pageText.append("""</ul>
-                        </div>""")                                 
-            
+                        </div>""")
+
             pageText.append("""
             <a href="#" class="btn {0} btn-lg" style="font-size: {5}vw;">{3}</a>
             <a href="#" class="btn {0} btn-lg" style="font-size: {5}vw;">{4}</a>
         </div>
-        """.format(cold_text,roomText,setTemp,truTemp,valvePos,baseFontSize - 1.2))
+        """.format(cold_text, roomText, setTemp, truTemp, valvePos, baseFontSize - 1.2))
         pageText.append("""
         </div>""")
         maxLayout = ''.join(pageText)
         return maxLayout
-    
-    
+
     def buttonLayout(self):
         buttonSize = 1.4
         try:
-            heating_state     = DB.getBoiler()[2]
+            heating_state = DB.getBoiler()[2]
         except:
             heating_state = 0
         duty_cycle = DB.getCubes()[3]
 
         boiler_state, cube_state, active_cube, vera_state, baseFontSize, roomsCorrect = VAR.readVariables(['BoilerEnabled',
-                                                                                             'CubeOK',
-                                                                                             'ActiveCube',
-                                                                                             'VeraOK',
-                                                                                             'BaseFontSize',
-                                                                                             'RoomsCorrect'])
+                                                                                                           'CubeOK',
+                                                                                                           'ActiveCube',
+                                                                                                           'VeraOK',
+                                                                                                           'BaseFontSize',
+                                                                                                           'RoomsCorrect'])
         heating_cycle = self.dutyCycle(86400)
 
-        
         if boiler_state:
-            boilerIsOn = 'btn-success btn-md" name="boilerswitch" value="Boiler Enabled" style="font-size: {}vw;">'.format(baseFontSize - buttonSize)
+            boilerIsOn = 'btn-success btn-md" name="boilerswitch" value="Boiler Enabled" style="font-size: {}vw;">'.format(
+                baseFontSize - buttonSize)
         else:
-            boilerIsOn = 'btn-info btn-md" name="boilerswitch" value="Boiler Disabled" style="font-size: {}vw;">'.format(baseFontSize - buttonSize)
-            
+            boilerIsOn = 'btn-info btn-md" name="boilerswitch" value="Boiler Disabled" style="font-size: {}vw;">'.format(
+                baseFontSize - buttonSize)
+
         if heating_state:
-            heatIsOn = 'btn-danger btn-md" style="font-size: {}vw;">Heating is ON '.format(baseFontSize - buttonSize)
+            heatIsOn = 'btn-danger btn-md" style="font-size: {}vw;">Heating is ON '.format(
+                baseFontSize - buttonSize)
         else:
-            heatIsOn = 'btn-info btn-md" style="font-size: {}vw;">Heating is OFF '.format(baseFontSize - buttonSize)
-            
-        print "Cube state {}".format (cube_state)
+            heatIsOn = 'btn-info btn-md" style="font-size: {}vw;">Heating is OFF '.format(
+                baseFontSize - buttonSize)
+
+        print "Cube state {}".format(cube_state)
         if cube_state == 1:
-            cubeIsOn = 'btn-success btn-md" style="font-size: {}vw;">Cube{} '.format(baseFontSize - buttonSize, active_cube)
+            cubeIsOn = 'btn-success btn-md" style="font-size: {}vw;">Cube{} '.format(
+                baseFontSize - buttonSize, active_cube)
         elif cube_state == 0:
-            cubeIsOn = 'btn-warning btn-md" style="font-size: {}vw;">Cube{} '.format(baseFontSize - buttonSize, active_cube)
+            cubeIsOn = 'btn-warning btn-md" style="font-size: {}vw;">Cube{} '.format(
+                baseFontSize - buttonSize, active_cube)
         if not roomsCorrect:
-            cubeIsOn = 'btn-danger btn-md" style="font-size: {}vw;">Cube{} '.format(baseFontSize - buttonSize, active_cube)
-            
+            cubeIsOn = 'btn-danger btn-md" style="font-size: {}vw;">Cube{} '.format(
+                baseFontSize - buttonSize, active_cube)
+
         if vera_state:
-            veraIsOn = 'btn-success btn-md" style="font-size: {}vw;">Vera'.format(baseFontSize - buttonSize)
+            veraIsOn = 'btn-success btn-md" style="font-size: {}vw;">Vera'.format(
+                baseFontSize - buttonSize)
         else:
-            veraIsOn = 'btn-warning btn-md" style="font-size: {}vw;">Vera'.format(baseFontSize - buttonSize)
-            
+            veraIsOn = 'btn-warning btn-md" style="font-size: {}vw;">Vera'.format(
+                baseFontSize - buttonSize)
+
         html_text = """
     <div class="container-fluid bg-2 text-center">
         <iframe src="nowhere" class="hidden" name="sneaky">
@@ -580,9 +595,9 @@ class CreateUIPage():
         </form>
         </div>
     </div>
-          """.format(boilerIsOn,heatIsOn,heating_cycle,cubeIsOn,duty_cycle,veraIsOn,baseFontSize - 1.8)
+          """.format(boilerIsOn, heatIsOn, heating_cycle, cubeIsOn, duty_cycle, veraIsOn, baseFontSize - 1.8)
         return html_text
-    
+
     def variablesPage(self):
         pageText = []
         pageText.append("""<div class="container-fluid bg-2">
@@ -598,18 +613,18 @@ class CreateUIPage():
                             <input type="text" class="form-control" id="{0}" name="{0}" value="{1}">
                         </div>
                     </div>
-                """.format(_text[0],_text[1]))
-                
+                """.format(_text[0], _text[1]))
+
         pageText.append("""
         <div class="container-fluid text-center">
             <input type="submit" class="btn btn-default btn-lg onClick="refreshPage();" id="submit" value="Submit Changes" />
                 </div>
             </form>
         </div>""")
-            
+
         html_text = ''.join(pageText)
         return html_text
-    
+
     def shutdownButton(self):
         html_text = """
         <div class="container-fluid bg-1 text-center">
@@ -645,7 +660,7 @@ class CreateUIPage():
         </div>
         """
         return html_text
-    
+
     def weatherWidget(self):
         weather_widget = VAR.readVariables(['WeatherWidget'])
         html_text = """
@@ -655,7 +670,7 @@ class CreateUIPage():
         </div>
         """.format(weather_widget)
         return html_text
-    
+
     def keyPad(self):
         html_text = """
         <container>
@@ -673,14 +688,14 @@ class CreateUIPage():
         </container>
         """
         return html_text
-    
+
     def filler(self):
         html_text = """
         <div class="container-filler bg-3 text=center">
         </div>
         """
         return html_text
-    
+
     def page_bottom(self):
         html_text = """
         </main>
