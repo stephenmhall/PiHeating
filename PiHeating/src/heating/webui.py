@@ -169,6 +169,7 @@ class CreateUIPage():
         goodTempsString = DB.getGoodTemps()
         goodTemps = dict(goodTempsString)
         roomTemps = []
+        actualTemp = '21.2'
         global boilerOn
         for rooms in maxRooms:
             # print rooms
