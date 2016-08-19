@@ -291,8 +291,15 @@ class MaxInterface():
                     {dev_adr: [dev_type, dev_sn, dev_name, dev_room, 0, this_now, 0, 0, 7]})
         dbMessage = []
         for keys in rooms:
-            dbList = keys, rooms[keys][0], rooms[keys][1]
+            roomText = str(rooms[keys][0])
+
+            # For testing ' in names
+#             if roomText == "Bathroom":
+#                 roomText = "Bathroom's"
+
+            dbList = keys, roomText, rooms[keys][1]
             dbMessage.append(dbList)
+        print dbMessage
         DbUtils().updateRooms(dbMessage)
         dbMessage = []
         for keys in devices:
@@ -338,7 +345,7 @@ class MaxInterface():
 
             # WallMountedThermostat (dev_type 3)
             if dev_len == 13:
-                print "WALL THERMOSTAT"
+                # print "WALL THERMOSTAT"
                 valve_pos = 999
                 if valve_info & 3 != 2:
 
@@ -400,7 +407,7 @@ class MaxInterface():
             dbList = keys, valves[keys][0], valves[keys][1], valves[keys][
                 2], valves[keys][3], valves[keys][4], valves[keys][5]
             dbMessage.append(dbList)
-            print dbList
+            # print dbList
         DbUtils().updateValves(dbMessage)
 
     def getCurrentOutsidetemp(self):
