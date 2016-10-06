@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import logging
 import sqlite3
-import time
 dataBase = 'heating.db'
 module_logger = logging.getLogger("main.database")
 
@@ -13,13 +12,6 @@ class DbUtils():
         Database utilities
         """
         self.logger = logging.getLogger("main.database.DbUtils")
-        conn = sqlite3.connect(dataBase)
-        cursor = conn.cursor()  # Cursor object to execute sql commands
-
-        cursor.execute("""CREATE TABLE IF NOT EXISTS lastgoodtemps
-                        (RoomName TEXT PRIMARY KEY,
-                         Temp TEXT)
-                        """)
 
     def initialiseDB(self):
         # print "initialising database"
