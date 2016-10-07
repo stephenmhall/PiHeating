@@ -7,5 +7,5 @@ The message gets to the Boiler via a Vera home automation unit and Mysensor 433M
 
 Basic, and I do mean that, Instructions can be found in /PiHeating/src/heating/installation.txt and crontab instructions.txt
 
-made changes to the basic folder layout to make it easier to install on Raspberry. CD into your home directory on Pi the git clone the 
-files in. This will create a PiHeating folder with the required files inside. 
+made changes to the basic folder layout to make it easier to install on Raspberry. CD into your home directory on Pi then
+git clone the files in from the link provided by Git. This will create a PiHeating folder with the required files inside. 
