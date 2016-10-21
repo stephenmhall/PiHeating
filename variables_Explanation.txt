@@ -1,0 +1,42 @@
+IP address of Raspberry Pi                          WebIP,192.168.0.41
+Port used for Web interface                         WebPort,4102
+IP Address of 1st Max Cube                          MaxIP,192.168.0.36
+IP Address of 2nd Max Cube                          MaxIP2,192.168.0.37
+Port used on MAX Cube                               MaxPort,62910
+IP Address of Vera Home automation box              VeraIP,192.168.0.13
+Port used by Vera                                   VeraPort,3480
+Device number of Boiler switch in Vera              Device,92
+    This is a 433MHz Mysensor switch
+Vera command to switch device (boiler) on / off     VeraControl,http://{}:{}/data_request?id=lu_action&output_format=xml&DeviceNum={}&serviceId=urn:upnp-org:serviceId:SwitchPower1&action=SetTarget&newTargetValue={}
+Vera command to get state of boiler device          VeraGetData,http://{}:{}/data_request?id=variableget&DeviceNum={}&serviceId={}&Variable={}
+Device number of outside Temp sensor                VeraOutsideTempID,112
+Vera device type for Temp sensor                    VeraOutsideTempService,urn:upnp-org:serviceId:TemperatureSensor1
+Use vera temperature 1=yes 0=no                     VeraTemp,1
+    if 0 will get temp from OpenWeathermaps
+Allow change Boiler state                           BoilerEnabled,1
+    Disable boiler by clicking Boiler Enable on Web interface.
+Interval time to check valves (seconds)             Interval,135
+Max cube is ok, updated by system                   CubeOK,1
+Cube 1 or 2 in use, updated by system               ActiveCube,1
+Vera is OK, updated by system                       VeraOK,0
+Turns on/off some debugging                         PrintData,0
+How often the web interface auto updates (seconds)  PageRefresh,67
+How open one valve must be to turn on heating       SingleRadThreshold,78
+How open multiple valves must be for heating        MultiRadThreshold,60
+Number of valves that must be above threshold       MultiRadCount,2
+If all valve values added are above this heat on    AllValveTotal,120
+Openweathermap API key, get an account              WeatherKey,713951e4ce6xxxxxxxxxb7a10b88f63
+Openweathermap your city ID.                        WeatherCityID,6640068
+HTML for weather widget, update with your details.  WeatherWidget,http://forecast.io/embed/#lat=57.155689&lon=-2.295520&name=Kier Circle Westhill&units=uk
+Size of font on web interface.                      BaseFontSize,3
+level of logging that is saved in log files         LoggingLevel,INFO
+Used to enable a relay on ESP8266 board.            ManualHeatingSwitch,1
+Use an ESP8266 attached neopixel display.           UseNeoPixel,1
+If boiler locked On or OFF, updated by system.      BoilerOverride,2
+Used to calculate if MAX has failed, maybe..        ExpectedNoOfRooms,5
+Updated by system from above.                       RoomsCorrect,0
+Enable Vera virtual temperature updates.            VeraVirtualTemps,1
+    Vera Temp sensor with no actual hardware.     
+MAX room name and Vera Device number to sync.       VeraVirtualRooms,{'Bedroom 2':103; 'Bedroom 1':135; 'Dining-Extension':139; 'Living Room':157}
+Vera command to update virtual temps.               VeraUpdateTemps,http://192.168.0.13:3480/data_request?id=variableset&DeviceNum={}&serviceId=urn:upnp-org:serviceId:TemperatureSensor1&Variable=CurrentTemperature&Value={}
+    I had problems creating the command so got lazy and hard coded the address.
