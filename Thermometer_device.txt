@@ -1,0 +1,8 @@
+Settings to add a virtual Temperature sensor to Vera. Also the command to update said temperature.
+
+device_type	urn:schemas-micasaverde-com:device:TemperatureSensor:1
+device_file	D_TemperatureSensor1.xml
+device_json	D_TemperatureSensor1.json
+
+
+http://192.168.0.13:3480/data_request?id=variableset&DeviceNum=103&serviceId=urn:upnp-org:serviceId:TemperatureSensor1&Variable=CurrentTemperature&Value=11.4
